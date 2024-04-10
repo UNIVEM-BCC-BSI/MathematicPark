@@ -10,11 +10,10 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pygame.time.Clock()
 pygame.display.set_caption('Mathematic Park')
 
-test_surface = pygame.Surface((100, 100))
-test_surface.fill('Red')
+player_surface = pygame.image.load('img/player200.png')
 
-floor_surface = pygame.Surface((1280, 450))
-floor_surface.fill('Green')
+
+scene_surface = pygame.image.load('img/scene.jpg')
 
 while True:
     for event in pygame.event.get():
@@ -22,8 +21,8 @@ while True:
             pygame.quit()
             exit()
 
-    screen.blit(floor_surface, (0, 550))
-    screen.blit(test_surface, (80, 450))
+    screen.blit(scene_surface, (0, -7))
+    screen.blit(player_surface, (80, 356))
 
     pygame.display.update()
     clock.tick(30)
