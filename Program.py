@@ -12,6 +12,7 @@ pygame.display.set_caption('Mathematic Park')
 
 player_surface = pygame.image.load('img/player200.png').convert_alpha()
 player_rect = player_surface.get_rect(midbottom = (160, 555))
+player_gravity = -25
 
 scene_surface = pygame.image.load('img/scene.jpg').convert()
 
@@ -23,9 +24,19 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
+        
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if player_rect.collidepoint(event.pos):
+                player_gravity = -20
+
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE or event.key == pygame.K_UP or event.key == pygame.K_PAGEUP: 
+                player_gravity = -20
 
 
 
+    player_gravity += 2
+    player_rect.y += player_gravity
     screen.blit(scene_surface, (0, -7))
     screen.blit(player_surface, player_rect)
 
@@ -37,3 +48,4 @@ while True:
 
     pygame.display.update()
     clock.tick(30)
+    
