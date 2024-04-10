@@ -11,10 +11,12 @@ clock = pygame.time.Clock()
 pygame.display.set_caption('Mathematic Park')
 
 player_surface = pygame.image.load('img/player200.png').convert_alpha()
+player_rect = player_surface.get_rect(midbottom = (160, 555))
+
 scene_surface = pygame.image.load('img/scene.jpg').convert()
 
 cone_surface = pygame.image.load('img/cone.png').convert_alpha()
-cone_xpos = 1280
+cone_rect = cone_surface.get_rect(midbottom = (1330, 550))
 
 while True:
     for event in pygame.event.get():
@@ -25,13 +27,13 @@ while True:
 
 
     screen.blit(scene_surface, (0, -7))
-    screen.blit(player_surface, (80, 356))
+    screen.blit(player_surface, player_rect)
 
-    cone_xpos -= 8
-    if cone_xpos < -100:
-        cone_xpos = 1280
+    cone_rect.x -= 8
+    if cone_rect.right <= 0:
+        cone_rect.left = 1280
 
-    screen.blit(cone_surface, (cone_xpos, 450))
+    screen.blit(cone_surface, cone_rect)
 
     pygame.display.update()
     clock.tick(30)
