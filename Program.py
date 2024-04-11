@@ -16,11 +16,11 @@ pygame.display.set_caption('Mathematic Park')
 game_active = True
 
 #Variáveis de texto
-title_font = pygame.font.Font(None, 100)
-subtitle_font = pygame.font.Font(None, 50)
+title_font = pygame.font.Font('ARCADECLASSIC.TTF', 100)
+subtitle_font = pygame.font.Font('ARCADECLASSIC.TTF', 50)
 
-game_over_text_surface = title_font.render('Você perdeu', False, 'White')
-game_over_press_button_text_surface = subtitle_font.render('Pressione espaço para tentar novamente', False, 'White')
+game_over_text_surface = title_font.render('Voce  perdeu', False, 'yellow')
+game_over_press_button_text_surface = subtitle_font.render('Pressione  espaco  para  tentar  novamente', False, 'White')
 
 #Variáveis do player
 player_surface = pygame.image.load('img/player200.png').convert_alpha()
@@ -84,7 +84,7 @@ while True:
     else:
         screen.fill('black')
         screen.blit(game_over_text_surface, (400, 150))
-        screen.blit(game_over_press_button_text_surface, (300, 400))
+        screen.blit(game_over_press_button_text_surface, (150, 400))
 
 
 
