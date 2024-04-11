@@ -37,11 +37,11 @@ while True:
         
         #Eventos de pulo
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if player_rect.collidepoint(event.pos):
+            if player_rect.collidepoint(event.pos) and player_rect.bottom == GROUND_LEVEL:
                 player_gravity = JUMP_VALUE
 
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE or event.key == pygame.K_UP or event.key == pygame.K_PAGEUP: 
+            if (event.key == pygame.K_SPACE or event.key == pygame.K_UP or event.key == pygame.K_PAGEUP or pygame.K_w) and player_rect.bottom == GROUND_LEVEL: 
                 player_gravity = JUMP_VALUE
 
     #Funcionalidade da gravidade
