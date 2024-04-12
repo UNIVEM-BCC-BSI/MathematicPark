@@ -13,14 +13,20 @@ JUMP_VALUE = -30
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pygame.time.Clock()
 pygame.display.set_caption('Mathematic Park')
-game_active = True
+game_active = False
+start_screen = True
 
 #Variáveis de texto
 title_font = pygame.font.Font('ARCADECLASSIC.TTF', 100)
 subtitle_font = pygame.font.Font('ARCADECLASSIC.TTF', 50)
+start_font = pygame.font.Font('ARCADECLASSIC.TTF', 32)
 
 game_over_text_surface = title_font.render('Voce  perdeu', False, 'yellow')
 game_over_press_button_text_surface = subtitle_font.render('Pressione  espaco  para  tentar  novamente', False, 'White')
+start_text = start_font.render('Pressione  qualquer  tecla  para  jogar', False, 'White')
+
+start_text_rect = start_text.get_rect()
+start_text_rect.midtop = (SCREEN_WIDTH/2, 500)
 
 #Variáveis do player
 player_surface = pygame.image.load('img/player200.png').convert_alpha()
@@ -36,13 +42,23 @@ cone_rect = cone_surface.get_rect(midbottom = (1330, GROUND_LEVEL))
 
 #Loop do jogo
 while True:
+    
+    #Tela Inicial
+    while start_screen:
+        screen.blit(start_text, start_text_rect)
+        pygame.display.flip()
+        for key in pygame.event.get():
+            if key.type == pygame.KEYUP:
+                start_screen = False
+                game_active = True
+
     for event in pygame.event.get():
 
         #Funcionalidade de fechar o jogo
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
-        
+
         if game_active:
             #Eventos de pulo
             if event.type == pygame.MOUSEBUTTONDOWN:
