@@ -1,13 +1,54 @@
 import pygame
 from sys import exit
 
+class Player(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.image = pygame.image.load('img/player200.png').convert_alpha()
+        self.rect = self.image.get_rect(midbottom = (160, GROUND_LEVEL))
+        self.gravity = 0
+    
+    def player_input(self):
+        keys = pygame.key.get_pressed()
+        if (keys[pygame.K_SPACE] or keys[pygame.K_UP] or keys[pygame.K_PAGEUP]) and self.rect.bottom >= GROUND_LEVEL:
+            self.gravity = -33
+
+    def apply_gravity(self):
+        self.gravity += 2
+        self.rect.y += self.gravity
+        if self.rect.bottom >= GROUND_LEVEL:
+            self.rect.bottom = GROUND_LEVEL
+
+    def update(self):
+        self.player_input()
+        self.apply_gravity()
+
+class Obstacle(pygame.sprite.Sprite):
+    def __init__(self, type):
+        super().__init__()
+
+        if type == "cone":
+            self.image = pygame.image.load('img/cone.png').convert_alpha()
+
+        self.rect = self.image.get_rect(midbottom = (1330, GROUND_LEVEL))
+        self.count = 0
+        self.question_rect = pygame.Rect(self.rect.top, self.rect.left,  4, 1000)
+        
+        
+
+    def update(self):
+        self.rect.x -= 12
+        if self.rect.right <= 0:
+            self.rect.left = 1280
+        self.question_rect.x = self.rect.x
+        pygame.draw.rect(screen, (255, 0, 0), self.question_rect)
+
 pygame.init()
 
 # Constantes
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
 GROUND_LEVEL = 555
-JUMP_VALUE = -35
 
 #Variáveis do Pygame
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -31,19 +72,16 @@ start_text_rect.midtop = (SCREEN_WIDTH/2, 500)
 
 question_text_surface = subtitle_font.render('PERGUNTA Apertes espaço', False, 'Black')
 
-#Variáveis do player
-player_surface = pygame.image.load('img/player200.png').convert_alpha()
-player_rect = player_surface.get_rect(midbottom = (160, GROUND_LEVEL))
-player_gravity = 0
+#Grupos
+player = pygame.sprite.GroupSingle()
+player.add(Player())
+
+obstacle_group = pygame.sprite.Group()
+obstacle_group.add(Obstacle("cone"))
+
 
 #Variáveis do cenário
 scene_surface = pygame.image.load('img/scene.jpg').convert()
-
-#Variáveis do obstáculo
-cone_surface = pygame.image.load('img/cone.png').convert_alpha()
-cone_rect = cone_surface.get_rect(midbottom = (1330, GROUND_LEVEL))
-question_rect = pygame.Rect(cone_rect.top, cone_rect.left,  4, 1000)
-obstacle_count = 0
 
 #Loop do jogo
 while True:
@@ -71,62 +109,38 @@ while True:
                 exit()
             if key.type == pygame.KEYUP:
                 question_active = False 
-                obstacle_count += 1
+                obstacle_group.count += 1
 
     for event in pygame.event.get():
-
         #Funcionalidade de fechar o jogo
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
 
-        if game_active:
-            #Eventos de pulo
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if player_rect.collidepoint(event.pos) and player_rect.bottom == GROUND_LEVEL:
-                    player_gravity = JUMP_VALUE
-
-            if event.type == pygame.KEYDOWN:
-                if (event.key == pygame.K_SPACE or event.key == pygame.K_UP or event.key == pygame.K_PAGEUP or pygame.K_w) and player_rect.bottom == GROUND_LEVEL: 
-                    player_gravity = JUMP_VALUE
-
-        else:
-            if event.type == pygame.KEYDOWN:
-                if (event.key == pygame.K_SPACE):
-                    game_active = True
-                    cone_rect.left = 1280
-                    obstacle_count = 0
-
     if game_active:
-        #Funcionalidade da gravidade
-        player_gravity += 2
-        player_rect.y += player_gravity
-
-        #Funcionalidade do chão
-        if player_rect.bottom > GROUND_LEVEL:
-            player_rect.bottom = GROUND_LEVEL
-
         #Colisões
-        if cone_rect.colliderect(player_rect):
-            game_active = False
+        # if cone_rect.colliderect(player_rect):
+        #     game_active = False
 
-        if obstacle_count == 0:
-            if question_rect.colliderect(player_rect):
-                question_active = True
+        # if obstacle_count == 0:
+        #     if question_rect.colliderect(player_rect):
+        #         question_active = True
         
-
-        #Mecânica de teste do movimento do cone
-        cone_rect.x -= 15
-        if cone_rect.right <= 0:
-            cone_rect.left = 1280
-            obstacle_count = 0
-        question_rect.midbottom = cone_rect.midtop
-
         #Atualizações no display
         screen.blit(scene_surface, (0, -7))
-        screen.blit(cone_surface, cone_rect)
-        screen.blit(player_surface, player_rect)
-        pygame.draw.rect(screen, (255, 0, 0), question_rect)
+        player.draw(screen)
+        player.update()
+
+        obstacle_group.draw(screen)
+        for sprite in obstacle_group:
+             question_rect = pygame.Rect(0, 0,  4, 1000)
+             question_rect.x = sprite.rect.x
+             question_rect.midbottom = sprite.rect.midtop
+             pygame.draw.rect(screen, (255, 0, 0), question_rect)
+        obstacle_group.update()
+
+
+        # pygame.draw.rect(screen, (255, 0, 0), question_rect)
     else:
         screen.fill('black')
         screen.blit(game_over_text_surface, (400, 150))
