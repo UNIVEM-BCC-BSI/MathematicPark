@@ -7,7 +7,7 @@ pygame.init()
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
 GROUND_LEVEL = 555
-JUMP_VALUE = -30
+JUMP_VALUE = -35
 
 #Variáveis do Pygame
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -15,6 +15,7 @@ clock = pygame.time.Clock()
 pygame.display.set_caption('Mathematic Park')
 game_active = False
 start_screen = True
+question_active = False
 
 #Variáveis de texto
 title_font = pygame.font.Font('ARCADECLASSIC.TTF', 100)
@@ -28,6 +29,8 @@ start_text = start_font.render('Pressione  qualquer  tecla  para  jogar', False,
 start_text_rect = start_text.get_rect()
 start_text_rect.midtop = (SCREEN_WIDTH/2, 500)
 
+question_text_surface = subtitle_font.render('PERGUNTA Apertes espaço', False, 'Black')
+
 #Variáveis do player
 player_surface = pygame.image.load('img/player200.png').convert_alpha()
 player_rect = player_surface.get_rect(midbottom = (160, GROUND_LEVEL))
@@ -39,6 +42,8 @@ scene_surface = pygame.image.load('img/scene.jpg').convert()
 #Variáveis do obstáculo
 cone_surface = pygame.image.load('img/cone.png').convert_alpha()
 cone_rect = cone_surface.get_rect(midbottom = (1330, GROUND_LEVEL))
+question_rect = pygame.Rect(cone_rect.top, cone_rect.left,  4, 1000)
+obstacle_count = 0
 
 #Loop do jogo
 while True:
@@ -48,9 +53,25 @@ while True:
         screen.blit(start_text, start_text_rect)
         pygame.display.flip()
         for key in pygame.event.get():
+            if key.type == pygame.QUIT:
+                pygame.quit()
+                exit()
             if key.type == pygame.KEYUP:
                 start_screen = False
                 game_active = True
+                
+    
+    while question_active:
+        # screen.blit(question_text_surface, (200, 50))
+        screen.blit(start_text, start_text_rect)
+        pygame.display.flip()
+        for key in pygame.event.get():
+            if key.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            if key.type == pygame.KEYUP:
+                question_active = False 
+                obstacle_count += 1
 
     for event in pygame.event.get():
 
@@ -74,6 +95,7 @@ while True:
                 if (event.key == pygame.K_SPACE):
                     game_active = True
                     cone_rect.left = 1280
+                    obstacle_count = 0
 
     if game_active:
         #Funcionalidade da gravidade
@@ -88,20 +110,27 @@ while True:
         if cone_rect.colliderect(player_rect):
             game_active = False
 
+        if obstacle_count == 0:
+            if question_rect.colliderect(player_rect):
+                question_active = True
+        
+
         #Mecânica de teste do movimento do cone
         cone_rect.x -= 15
         if cone_rect.right <= 0:
             cone_rect.left = 1280
+            obstacle_count = 0
+        question_rect.midbottom = cone_rect.midtop
 
         #Atualizações no display
         screen.blit(scene_surface, (0, -7))
         screen.blit(cone_surface, cone_rect)
         screen.blit(player_surface, player_rect)
+        pygame.draw.rect(screen, (255, 0, 0), question_rect)
     else:
         screen.fill('black')
         screen.blit(game_over_text_surface, (400, 150))
         screen.blit(game_over_press_button_text_surface, (150, 400))
-
 
 
     pygame.display.update()
