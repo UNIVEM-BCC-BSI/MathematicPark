@@ -1,10 +1,12 @@
 import pygame
 from sys import exit
 
+from pygame.sprite import Group
+
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.image.load('img/player200.png').convert_alpha()
+        self.image = pygame.image.load('img/testplayer.png').convert_alpha()
         self.rect = self.image.get_rect(midbottom = (160, GROUND_LEVEL))
         self.gravity = 0
     
@@ -26,22 +28,47 @@ class Player(pygame.sprite.Sprite):
 class Obstacle(pygame.sprite.Sprite):
     def __init__(self, type):
         super().__init__()
-
         if type == "cone":
             self.image = pygame.image.load('img/cone.png').convert_alpha()
 
         self.rect = self.image.get_rect(midbottom = (1330, GROUND_LEVEL))
-        self.count = 0
-        self.question_rect = pygame.Rect(self.rect.top, self.rect.left,  4, 1000)
+        self.question_checkpoint = QuestionCheckpoint(self)
+        question_checkpoint_group.add(self.question_checkpoint)
         
-        
-
     def update(self):
         self.rect.x -= 12
         if self.rect.right <= 0:
-            self.rect.left = 1280
-        self.question_rect.x = self.rect.x
-        pygame.draw.rect(screen, (255, 0, 0), self.question_rect)
+            self.question_checkpoint.kill()
+            self.kill()
+            obstacle_group.add(Obstacle("cone"))
+            del self
+        else:
+            self.question_checkpoint.update()
+
+class QuestionCheckpoint(pygame.sprite.Sprite):
+    def __init__(self, Obstacle):
+        super().__init__()
+        self.obstacle = Obstacle
+        self.image = pygame.Surface((4, 1000))
+        self.rect = pygame.Rect(0, 0, 4, 1000)
+
+    def update(self):
+        self.rect.midbottom = self.obstacle.rect.midtop
+        pygame.draw.rect(screen, (255, 0, 0), self.rect)
+
+def collision_obstacle():
+    collided = pygame.sprite.spritecollide(player.sprite, obstacle_group, False)
+    if collided:
+        collided[0].question_checkpoint.kill()
+        collided[0].kill()
+        return False
+    return True
+
+def collision_question():
+    if pygame.sprite.spritecollide(player.sprite, question_checkpoint_group, True ):
+        return True
+    return False
+
 
 pygame.init()
 
@@ -76,9 +103,10 @@ question_text_surface = subtitle_font.render('PERGUNTA Apertes espaço', False, 
 player = pygame.sprite.GroupSingle()
 player.add(Player())
 
+question_checkpoint_group = pygame.sprite.Group()
+
 obstacle_group = pygame.sprite.Group()
 obstacle_group.add(Obstacle("cone"))
-
 
 #Variáveis do cenário
 scene_surface = pygame.image.load('img/scene.jpg').convert()
@@ -98,9 +126,7 @@ while True:
                 start_screen = False
                 game_active = True
                 
-    
     while question_active:
-        # screen.blit(question_text_surface, (200, 50))
         screen.blit(start_text, start_text_rect)
         pygame.display.flip()
         for key in pygame.event.get():
@@ -109,42 +135,35 @@ while True:
                 exit()
             if key.type == pygame.KEYUP:
                 question_active = False 
-                obstacle_group.count += 1
-
-    for event in pygame.event.get():
-        #Funcionalidade de fechar o jogo
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            exit()
 
     if game_active:
-        #Colisões
-        # if cone_rect.colliderect(player_rect):
-        #     game_active = False
-
-        # if obstacle_count == 0:
-        #     if question_rect.colliderect(player_rect):
-        #         question_active = True
-        
-        #Atualizações no display
         screen.blit(scene_surface, (0, -7))
         player.draw(screen)
-        player.update()
-
         obstacle_group.draw(screen)
-        for sprite in obstacle_group:
-             question_rect = pygame.Rect(0, 0,  4, 1000)
-             question_rect.x = sprite.rect.x
-             question_rect.midbottom = sprite.rect.midtop
-             pygame.draw.rect(screen, (255, 0, 0), question_rect)
+        question_checkpoint_group.draw(screen)
+
+        player.sprite.update()
         obstacle_group.update()
 
+        game_active = collision_obstacle()
+        question_active = collision_question()
 
-        # pygame.draw.rect(screen, (255, 0, 0), question_rect)
     else:
         screen.fill('black')
         screen.blit(game_over_text_surface, (400, 150))
         screen.blit(game_over_press_button_text_surface, (150, 400))
+        for key in pygame.event.get():
+            if key.type == pygame.KEYUP:
+                game_active = True
+                obstacle_group.add(Obstacle("cone"))
+            if key.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+
+    for key in pygame.event.get():
+        if key.type == pygame.QUIT:
+            pygame.quit()
+            exit()
 
 
     pygame.display.update()
