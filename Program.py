@@ -65,7 +65,9 @@ def collision_obstacle():
     return True
 
 def collision_question():
-    if pygame.sprite.spritecollide(player.sprite, question_checkpoint_group, True ):
+    collided = pygame.sprite.spritecollide(player.sprite, question_checkpoint_group, False )
+    if collided:
+        collided[0].kill()
         return True
     return False
 
@@ -140,7 +142,6 @@ while True:
         screen.blit(scene_surface, (0, -7))
         player.draw(screen)
         obstacle_group.draw(screen)
-        question_checkpoint_group.draw(screen)
 
         player.sprite.update()
         obstacle_group.update()
