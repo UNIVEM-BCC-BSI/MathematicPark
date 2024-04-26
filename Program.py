@@ -8,7 +8,7 @@ from pygame.sprite import Group
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.image.load('img/dino1.png').convert_alpha()
+        self.image = pygame.image.load('img/testplayer.png').convert_alpha()
         self.rect = self.image.get_rect(midbottom = (160, GROUND_LEVEL))
         self.gravity = 0
     
