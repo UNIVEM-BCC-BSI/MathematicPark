@@ -220,7 +220,7 @@ scene_surface = pygame.image.load('img/scene.jpg').convert()
 while True:
     
     #Tela Inicial
-    while game_state == 'start':
+    if game_state == 'start':
         screen.blit(start_text, start_text_rect)
         pygame.display.flip()
         for key in pygame.event.get():
