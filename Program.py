@@ -1,7 +1,7 @@
 import pygame
 from sys import exit
 from random import randint
-from pygame.sprite import Group
+from pygame.sprite import        Group
 
 #Classes
 
@@ -78,53 +78,99 @@ def collision_question():
         return True
     return False
 
-class question(pygame.sprite.Sprite):
+class Operation(pygame.sprite.Sprite):
+    #Texto para pedir a operação
+    def operation_text(self):
+        operation_text = operation_screen_font.render(f"Selecione qual Operação você quer jogar!!", False, 'White')
+        operation_text_rect = operation_text.get_rect()
+        operation_text_rect.center = (SCREEN_WIDTH/2, 150)
+        screen.blit(operation_text, operation_text_rect)
+
+        operation_sum_text = operation_screen_font.render(f"Soma", False, 'White')
+        operation_sum_text_rect = operation_sum_text.get_rect()
+        operation_sum_text_rect.center = (350, 300)
+        screen.blit(operation_sum_text, operation_sum_text_rect)
+
+        operation_sub_text = operation_screen_font.render(f"Subtração", False, 'White')
+        operation_sub_text_rect = operation_sub_text.get_rect()
+        operation_sub_text_rect.center = (850, 300)
+        screen.blit(operation_sub_text, operation_sub_text_rect)
+
+        operation_mul_text = operation_screen_font.render(f"Multiplicação", False, 'White')
+        operation_mul_text_rect = operation_mul_text.get_rect()
+        operation_mul_text_rect.center = (350, 600)
+        screen.blit(operation_mul_text, operation_mul_text_rect)
+
+        operation_div_text = operation_screen_font.render(f"Divisão", False, 'White')
+        operation_div_text_rect = operation_div_text.get_rect()
+        operation_div_text_rect.center = (850, 600)
+        screen.blit(operation_div_text, operation_div_text_rect)
+    
+    #puxa o operador em string para ser utilizado pela questão
+    def option(self, operator):
+        self.operation_option = operator
+
+class Question(pygame.sprite.Sprite):
     #Pede a variavel para usar na função calculate
     def __init__(self, operation):
-        self.operation = operation 
+        self.operation = operation
+        self.calculate()
+        self.show_question()
+        self.show_answer()
     
     #Gera números com o randint para fazer a conta e retorna o resultado
     def calculate(self):
-        self.num1 = randint(1, 50)
-        self.num2 = randint(1, 50)
+        if self.operation == '*':
+            self.num1 = randint(1, 10)
+            self.num2 = randint(1, 10)
+        
+        elif self.operation == '/':
+            self.num1 = randint(1, 20)
+            self.num2 = randint(1, 10)
+            while self.num1 % self.num2 != 0:
+                self.num1 = randint(1, 20)
+                self.num2 = randint(1, 10)
+        else:
+            self.num1 = randint(1, 100)
+            self.num2 = randint(1, 80)
+
         while self.num2 > self.num1:
-            self.num2 = randint(1, 50)
-        if self.operation == '+':
-            print(self.num1)
-            print(self.num2)
-            self.result = self.num1 + self.num2
-            return self.result
-    
+            self.num2 = randint(1, 80)
+
+        print(self.num1)
+        print(self.num2)
+        self.result = int(eval(str(self.num1) + self.operation + str(self.num2)))
+        return self.result
+   
     #Mostra a pergunta na tela
-    def question(self):
-        if self.operation == '+':
-            question_text = question_font.render(f"{self.num1}  +  {self.num2}", False, 'White')
-            question_text_rect = question_text.get_rect()
-            question_text_rect.center = (SCREEN_WIDTH/2, 150)
-            screen.blit(question_text, question_text_rect)
+    def show_question(self):
+        question_text = question_font.render(f"{self.num1} {self.operation} {self.num2}", False, 'White')
+        question_text_rect = question_text.get_rect()
+        question_text_rect.center = (SCREEN_WIDTH/2, 150)
+        screen.blit(question_text, question_text_rect)
     
     #Mostra as opções de respostas na tela
-    def answer(self):
-        if self.operation == '+':
-            resp1_text = question_font.render(f"{self.result}", False, 'White')
-            resp1_text_rect = question_text.get_rect()
-            resp1_text_rect.midtop = (450, 350)
-            screen.blit(resp1_text, resp1_text_rect)
+    def show_answer(self):
+        
+        resp1_text = question_font.render(f"{self.result}", False, 'White')
+        resp1_text_rect = question_text.get_rect()
+        resp1_text_rect.midtop = (450, 350)
+        screen.blit(resp1_text, resp1_text_rect)
 
-            resp2_text = question_font.render(f"{self.result + 5}", False, 'White')
-            resp2_text_rect = question_text.get_rect()
-            resp2_text_rect.midtop = (650, 350)
-            screen.blit(resp2_text, resp2_text_rect)
+        resp2_text = question_font.render(f"{self.result + 5}", False, 'White')
+        resp2_text_rect = question_text.get_rect()
+        resp2_text_rect.midtop = (650, 350)
+        screen.blit(resp2_text, resp2_text_rect)
 
-            resp3_text = question_font.render(f"{self.result + 2}", False, 'White')
-            resp3_text_rect = question_text.get_rect()
-            resp3_text_rect.midtop = (850, 350)
-            screen.blit(resp3_text, resp3_text_rect)
+        resp3_text = question_font.render(f"{self.result + 2}", False, 'White')
+        resp3_text_rect = question_text.get_rect()
+        resp3_text_rect.midtop = (850, 350)
+        screen.blit(resp3_text, resp3_text_rect)
 
-            resp4_text = question_font.render(f"{self.result - 3}", False, 'White')
-            resp4_text_rect = question_text.get_rect()
-            resp4_text_rect.midtop = (1050, 350)
-            screen.blit(resp4_text, resp4_text_rect)     
+        resp4_text = question_font.render(f"{self.result - 3}", False, 'White')
+        resp4_text_rect = question_text.get_rect()
+        resp4_text_rect.midtop = (1050, 350)
+        screen.blit(resp4_text, resp4_text_rect)     
 
 pygame.init()
 
@@ -146,11 +192,13 @@ question_active = False
 title_font = pygame.font.Font('ARCADECLASSIC.TTF', 100)
 subtitle_font = pygame.font.Font('ARCADECLASSIC.TTF', 50)
 start_font = pygame.font.Font('ARCADECLASSIC.TTF', 32)
+operation_screen_font = pygame.font.Font('arial.TTF', 32)
 question_font = pygame.font.Font('arial.TTF', 32)
 
 game_over_text_surface = title_font.render('Voce  perdeu', False, 'yellow')
 game_over_press_button_text_surface = subtitle_font.render('Pressione  espaco  para  tentar  novamente', False, 'White')
 start_text = start_font.render('Pressione  qualquer  tecla  para  jogar', False, 'White')
+
 question_text_surface = subtitle_font.render("Pergunta", False, 'Black')
 question_text = question_font.render('Digite um Número', False, 'White')
 
@@ -184,14 +232,41 @@ while True:
                 exit()
             if key.type == pygame.KEYUP:
                 start_screen = False
-                game_active = True  
+                game_active = False
+                
+
+    #Selecionar o Operador
+    while operation_screen:
+        screen.fill('black')
+        operation_screen_text = Operation()
+        operation_screen_text.operation_text()
+        operator = Operation()
+        pygame.display.flip()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_1:
+                    operator.operation_option = '+'
+                    operation_screen = False
+                    game_active = True
+                if event.key == pygame.K_2:
+                    operator.operation_option = '-'
+                    operation_screen = False
+                    game_active = True
+                if event.key == pygame.K_3:
+                    operator.operation_option = '*'
+                    operation_screen = False
+                    game_active = True
+                if event.key == pygame.K_4:
+                    operator.operation_option = '/'
+                    operation_screen = False
+                    game_active = True 
 
     #Loop da Questão         
     while question_active:
-        questão = question("+")
-        questão.calculate()
-        questão.question()
-        questão.answer()
+        question = Question(operator.operation_option)
         pygame.display.flip()
         waiting_response = True
         while waiting_response:
