@@ -61,23 +61,6 @@ class QuestionCheckpoint(pygame.sprite.Sprite):
         self.rect.midbottom = self.obstacle.rect.midtop
         pygame.draw.rect(screen, (255, 0, 0), self.rect)
 
-#Checa a colisão com o obstaculo, se colidir retorna True e deleta o obstaculo e a linha e se não colidir retorna False
-def collision_obstacle():
-    collided = pygame.sprite.spritecollide(player.sprite, obstacle_group, False)
-    if collided:
-        collided[0].question_checkpoint.kill()
-        collided[0].kill()
-        return False
-    return True
-
-#Checa a colisão com a linha da pergunta, se colidir retorna True e deleta a linha e se não colidir retorna False
-def collision_question():
-    collided = pygame.sprite.spritecollide(player.sprite, question_checkpoint_group, False )
-    if collided:
-        collided[0].kill()
-        return True
-    return False
-
 class Operation(pygame.sprite.Sprite):
     #Texto para pedir a operação
     def operation_text(self):
@@ -137,8 +120,6 @@ class Question(pygame.sprite.Sprite):
         while self.num2 > self.num1:
             self.num2 = randint(1, 80)
 
-        print(self.num1)
-        print(self.num2)
         self.result = int(eval(str(self.num1) + self.operation + str(self.num2)))
         return self.result
    
@@ -172,6 +153,23 @@ class Question(pygame.sprite.Sprite):
         resp4_text_rect.midtop = (1050, 350)
         screen.blit(resp4_text, resp4_text_rect)     
 
+#Checa a colisão com o obstaculo, se colidir retorna True e deleta o obstaculo e a linha e se não colidir retorna False
+def collision_obstacle():
+    collided = pygame.sprite.spritecollide(player.sprite, obstacle_group, False)
+    if collided:
+        collided[0].question_checkpoint.kill()
+        collided[0].kill()
+        return True
+    return False
+
+#Checa a colisão com a linha da pergunta, se colidir retorna True e deleta a linha e se não colidir retorna False
+def collision_question():
+    collided = pygame.sprite.spritecollide(player.sprite, question_checkpoint_group, False )
+    if collided:
+        collided[0].kill()
+        return True
+    return False
+
 pygame.init()
 
 # Constantes
@@ -183,10 +181,9 @@ GROUND_LEVEL = 555
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pygame.time.Clock()
 pygame.display.set_caption('Mathematic Park')
-game_active = False
-start_screen = True
-operation_screen = True
-question_active = False
+
+#Variáveis do jogo
+game_state = 'start'
 
 #Variáveis de texto
 title_font = pygame.font.Font('ARCADECLASSIC.TTF', 100)
@@ -223,7 +220,7 @@ scene_surface = pygame.image.load('img/scene.jpg').convert()
 while True:
     
     #Tela Inicial
-    while start_screen:
+    while game_state == 'start':
         screen.blit(start_text, start_text_rect)
         pygame.display.flip()
         for key in pygame.event.get():
@@ -231,12 +228,11 @@ while True:
                 pygame.quit()
                 exit()
             if key.type == pygame.KEYUP:
-                start_screen = False
-                game_active = False
+                game_state = 'operation'
                 
 
     #Selecionar o Operador
-    while operation_screen:
+    if game_state == 'operation':
         screen.fill('black')
         operation_screen_text = Operation()
         operation_screen_text.operation_text()
@@ -249,23 +245,19 @@ while True:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_1:
                     operator.operation_option = '+'
-                    operation_screen = False
-                    game_active = True
+                    game_state = 'running'
                 if event.key == pygame.K_2:
                     operator.operation_option = '-'
-                    operation_screen = False
-                    game_active = True
+                    game_state = 'running'
                 if event.key == pygame.K_3:
                     operator.operation_option = '*'
-                    operation_screen = False
-                    game_active = True
+                    game_state = 'running'
                 if event.key == pygame.K_4:
                     operator.operation_option = '/'
-                    operation_screen = False
-                    game_active = True 
+                    game_state = 'running'
 
     #Loop da Questão         
-    while question_active:
+    elif game_state == 'question':
         question = Question(operator.operation_option)
         pygame.display.flip()
         waiting_response = True
@@ -277,18 +269,18 @@ while True:
                     exit()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_CAPSLOCK:
-                        question_active = False
+                        game_state = 'running'
                         waiting_response = False
+
                     if event.key == pygame.K_SPACE:
                         for s in obstacle_group.sprites():
                             s.question_checkpoint.kill()
                             s.kill()
-                        question_active = False
-                        game_active = False
+                        game_state = 'game_over'
                         waiting_response = False
        
     #Jogo
-    if game_active:
+    elif game_state == 'running':
         screen.blit(scene_surface, (0, -7))
         player.draw(screen)
         obstacle_group.draw(screen)
@@ -296,17 +288,20 @@ while True:
         player.sprite.update()
         obstacle_group.update()
 
-        game_active = collision_obstacle()
-        question_active = collision_question()
+        if collision_obstacle():
+            game_state = 'game_over'
+
+        if collision_question():
+            game_state = 'question'
 
     #Tela de GameOver
-    else:
+    elif game_state == 'game_over':
         screen.fill('black')
         screen.blit(game_over_text_surface, (400, 150))
         screen.blit(game_over_press_button_text_surface, (150, 400))
         for key in pygame.event.get():
             if key.type == pygame.KEYDOWN:
-                game_active = True     
+                game_state = 'running'  
                 obstacle_group.add(Obstacle("cone"))
             if key.type == pygame.QUIT:
                 pygame.quit()
