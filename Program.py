@@ -230,9 +230,8 @@ while True:
             if key.type == pygame.KEYUP:
                 game_state = 'operation'
                 
-
     #Selecionar o Operador
-    if game_state == 'operation':
+    elif game_state == 'operation':
         screen.fill('black')
         operation_screen_text = Operation()
         operation_screen_text.operation_text()
@@ -256,29 +255,6 @@ while True:
                     operator.operation_option = '/'
                     game_state = 'running'
 
-    #Loop da Questão         
-    elif game_state == 'question':
-        question = Question(operator.operation_option)
-        pygame.display.flip()
-        waiting_response = True
-        while waiting_response:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.KEYDOWN = False
-                    pygame.quit()
-                    exit()
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_CAPSLOCK:
-                        game_state = 'running'
-                        waiting_response = False
-
-                    if event.key == pygame.K_SPACE:
-                        for s in obstacle_group.sprites():
-                            s.question_checkpoint.kill()
-                            s.kill()
-                        game_state = 'game_over'
-                        waiting_response = False
-       
     #Jogo
     elif game_state == 'running':
         screen.blit(scene_surface, (0, -7))
@@ -306,6 +282,29 @@ while True:
             if key.type == pygame.QUIT:
                 pygame.quit()
                 exit()        
+    
+    #Loop da Questão         
+    elif game_state == 'question':
+        question = Question(operator.operation_option)
+        pygame.display.flip()
+        waiting_response = True
+        while waiting_response:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.KEYDOWN = False
+                    pygame.quit()
+                    exit()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_CAPSLOCK:
+                        game_state = 'running'
+                        waiting_response = False
+
+                    if event.key == pygame.K_SPACE:
+                        for s in obstacle_group.sprites():
+                            s.question_checkpoint.kill()
+                            s.kill()
+                        game_state = 'game_over'
+                        waiting_response = False
 
     for key in pygame.event.get():
         if key.type == pygame.QUIT:
