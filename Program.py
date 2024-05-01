@@ -1,7 +1,7 @@
 import pygame
 from sys import exit
 from random import randint
-from pygame.sprite import        Group
+from pygame.sprite import Group
 
 #Classes
 
@@ -61,7 +61,7 @@ class QuestionCheckpoint(pygame.sprite.Sprite):
         self.rect.midbottom = self.obstacle.rect.midtop
         pygame.draw.rect(screen, (255, 0, 0), self.rect)
 
-class Operation(pygame.sprite.Sprite):
+class Operation():
     #Texto para pedir a operação
     def operation_text(self):
         operation_text = operation_screen_font.render(f"Selecione qual Operação você quer jogar!!", False, 'White')
@@ -153,6 +153,29 @@ class Question(pygame.sprite.Sprite):
         resp4_text_rect.midtop = (1050, 350)
         screen.blit(resp4_text, resp4_text_rect)     
 
+class Stage():
+    def __init__(self):
+        self.current_stage = 0
+        self.obstacles_counter = 0
+        self.all_obstacle_numbers = [1, 2, 3]
+        self.obstacles_number = self.all_obstacle_numbers[self.current_stage]
+
+    #Serve para mexer com o contador de obstáculos da fase e passar entre fases/bosses 
+    def next_stage(self, game_state):
+        if game_state == 'boss':
+            game_state = 'running'
+            if self.current_stage >= len(self.all_obstacle_numbers) - 1 :
+                game_state = 'game_over'
+            else:
+                self.current_stage +=1
+                self.obstacles_number = self.all_obstacle_numbers[self.current_stage]
+                self.obstacles_counter = 0
+        self.obstacles_counter += 1
+        #Se fase estiver concluida
+        if self.obstacles_counter >= self.obstacles_number:
+                game_state = 'boss'
+
+
 #Checa a colisão com o obstaculo, se colidir retorna True e deleta o obstaculo e a linha e se não colidir retorna False
 def collision_obstacle():
     collided = pygame.sprite.spritecollide(player.sprite, obstacle_group, False)
@@ -184,6 +207,7 @@ pygame.display.set_caption('Mathematic Park')
 
 #Variáveis do jogo
 game_state = 'start'
+stage = Stage()
 
 #Variáveis de texto
 title_font = pygame.font.Font('ARCADECLASSIC.TTF', 100)
@@ -284,7 +308,7 @@ while True:
                 exit()        
     
     #Loop da Questão         
-    elif game_state == 'question':
+    elif game_state == 'question' :
         question = Question(operator.operation_option)
         pygame.display.flip()
         waiting_response = True
@@ -297,6 +321,7 @@ while True:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_CAPSLOCK:
                         game_state = 'running'
+                        stage.next_stage(game_state)
                         waiting_response = False
 
                     if event.key == pygame.K_SPACE:
@@ -306,6 +331,10 @@ while True:
                         game_state = 'game_over'
                         waiting_response = False
 
+    elif game_state == 'boss':
+        while True:
+            print('BOSS')
+        
     for key in pygame.event.get():
         if key.type == pygame.QUIT:
             pygame.quit()
