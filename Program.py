@@ -48,7 +48,7 @@ class Obstacle(pygame.sprite.Sprite):
         self.rect.x -= 12
         if self.rect.right <= 0:
             self.question_checkpoint.kill()
-            game.state = game.level.next_level()
+            game.level.next_level()
             self.kill()
             obstacle_group.add(Obstacle("cone"))
             del self
@@ -172,26 +172,27 @@ class Level():
         if self.game.state == 'boss':
             #Se chegar no final do jogo
             if self.current_level >= len(self.all_obstacle_numbers) - 1 :
-                return 'game_over'
+                self.game.state = 'game_over'
             #Caso seja em boss mas não no final do jogo
             else:
                 self.current_level +=1
                 self.obstacles_number = self.all_obstacle_numbers[self.current_level]
                 self.obstacles_counter = 0
-                return 'running'
-            
-        self.obstacles_counter += 1
+                self.game.state = 'running'
+        else:
+            self.obstacles_counter += 1
 
-        #Se for passar de fase
-        if self.obstacles_counter >= self.obstacles_number: 
-            return 'boss'
-        
-        self.obstacles_counter += 1
-        print(self.obstacles_counter, self.obstacles_number)
-        #Se fase estiver concluida
-        if self.obstacles_counter >= self.obstacles_number:
-            game.state = 'boss'
-        return 'running'
+            #Se for passar de fase
+            if self.obstacles_counter >= self.obstacles_number: 
+                self.game.state = 'boss'
+            
+            else:
+                self.obstacles_counter += 1
+                #Se fase estiver concluida
+                if self.obstacles_counter >= self.obstacles_number:
+                    self.game.state = 'boss'
+                else: self.game.state = 'running'
+
 
 #Checa a colisão com o obstaculo, se colidir retorna True e deleta o obstaculo e a linha e se não colidir retorna False
 def collision_obstacle():
@@ -349,8 +350,8 @@ while True:
 
     elif game.state == 'boss':
         waiting_response = True
+        print('Fase BOSS')
         while waiting_response:
-            print('BOSS')
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.KEYDOWN = False
@@ -358,7 +359,7 @@ while True:
                     exit()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_CAPSLOCK:
-                        game.state = game.level.next_level()
+                        game.level.next_level()
                         waiting_response = False
 
                     if event.key == pygame.K_SPACE:
@@ -372,7 +373,6 @@ while True:
         if key.type == pygame.QUIT:
             pygame.quit()
             exit()
-
     #Atualização do Display e FPS
     pygame.display.update()
     clock.tick(30)
