@@ -1,9 +1,14 @@
 import pygame
 from sys import exit
 from random import randint
-from pygame.sprite import        Group
+from pygame.sprite import Group
 
 #Classes
+
+class Game():
+    def __init__(self) -> None:
+        self.state = 'start'
+        self.level = Level(self)
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
@@ -43,6 +48,7 @@ class Obstacle(pygame.sprite.Sprite):
         self.rect.x -= 12
         if self.rect.right <= 0:
             self.question_checkpoint.kill()
+            game.level.next_level()
             self.kill()
             obstacle_group.add(Obstacle("cone"))
             del self
@@ -61,7 +67,7 @@ class QuestionCheckpoint(pygame.sprite.Sprite):
         self.rect.midbottom = self.obstacle.rect.midtop
         pygame.draw.rect(screen, (255, 0, 0), self.rect)
 
-class Operation(pygame.sprite.Sprite):
+class Operation():
     #Texto para pedir a operação
     def operation_text(self):
         operation_text = operation_screen_font.render(f"Selecione qual Operação você quer jogar!!", False, 'White')
@@ -153,6 +159,41 @@ class Question(pygame.sprite.Sprite):
         resp4_text_rect.midtop = (1050, 350)
         screen.blit(resp4_text, resp4_text_rect)     
 
+class Level():
+    def __init__(self, game):
+        self.current_level = 0
+        self.obstacles_counter = 0
+        self.all_obstacle_numbers = [1, 2, 3]
+        self.obstacles_number = self.all_obstacle_numbers[self.current_level]
+        self.game = game
+
+    #Serve para mexer com o contador de obstáculos da fase e passar entre fases/bosses em caso de acerto de pergunta. Retorna o valor atualizado de game_state 
+    def next_level(self):
+        if self.game.state == 'boss':
+            #Se chegar no final do jogo
+            if self.current_level >= len(self.all_obstacle_numbers) - 1 :
+                self.game.state = 'game_over'
+            #Caso seja em boss mas não no final do jogo
+            else:
+                self.current_level +=1
+                self.obstacles_number = self.all_obstacle_numbers[self.current_level]
+                self.obstacles_counter = 0
+                self.game.state = 'running'
+        else:
+            self.obstacles_counter += 1
+
+            #Se for passar de fase
+            if self.obstacles_counter >= self.obstacles_number: 
+                self.game.state = 'boss'
+            
+            else:
+                self.obstacles_counter += 1
+                #Se fase estiver concluida
+                if self.obstacles_counter >= self.obstacles_number:
+                    self.game.state = 'boss'
+                else: self.game.state = 'running'
+
+
 #Checa a colisão com o obstaculo, se colidir retorna True e deleta o obstaculo e a linha e se não colidir retorna False
 def collision_obstacle():
     collided = pygame.sprite.spritecollide(player.sprite, obstacle_group, False)
@@ -182,8 +223,8 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pygame.time.Clock()
 pygame.display.set_caption('Mathematic Park')
 
-#Variáveis do jogo
-game_state = 'start'
+#Jogo
+game = Game()
 
 #Variáveis de texto
 title_font = pygame.font.Font('ARCADECLASSIC.TTF', 100)
@@ -220,7 +261,7 @@ scene_surface = pygame.image.load('img/scene.jpg').convert()
 while True:
     
     #Tela Inicial
-    if game_state == 'start':
+    if game.state == 'start':
         screen.blit(start_text, start_text_rect)
         pygame.display.flip()
         for key in pygame.event.get():
@@ -228,10 +269,10 @@ while True:
                 pygame.quit()
                 exit()
             if key.type == pygame.KEYUP:
-                game_state = 'operation'
+                game.state = 'operation'
                 
     #Selecionar o Operador
-    elif game_state == 'operation':
+    elif game.state == 'operation':
         screen.fill('black')
         operation_screen_text = Operation()
         operation_screen_text.operation_text()
@@ -244,19 +285,19 @@ while True:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_1:
                     operator.operation_option = '+'
-                    game_state = 'running'
+                    game.state = 'running'
                 if event.key == pygame.K_2:
                     operator.operation_option = '-'
-                    game_state = 'running'
+                    game.state = 'running'
                 if event.key == pygame.K_3:
                     operator.operation_option = '*'
-                    game_state = 'running'
+                    game.state = 'running'
                 if event.key == pygame.K_4:
                     operator.operation_option = '/'
-                    game_state = 'running'
+                    game.state = 'running'
 
     #Jogo
-    elif game_state == 'running':
+    elif game.state == 'running':
         screen.blit(scene_surface, (0, -7))
         player.draw(screen)
         obstacle_group.draw(screen)
@@ -265,26 +306,26 @@ while True:
         obstacle_group.update()
 
         if collision_obstacle():
-            game_state = 'game_over'
+            game.state = 'game_over'
 
         if collision_question():
-            game_state = 'question'
+            game.state = 'question'
 
     #Tela de GameOver
-    elif game_state == 'game_over':
+    elif game.state == 'game_over':
         screen.fill('black')
         screen.blit(game_over_text_surface, (400, 150))
         screen.blit(game_over_press_button_text_surface, (150, 400))
         for key in pygame.event.get():
             if key.type == pygame.KEYDOWN:
-                game_state = 'running'  
+                game.state = 'running'  
                 obstacle_group.add(Obstacle("cone"))
             if key.type == pygame.QUIT:
                 pygame.quit()
                 exit()        
     
     #Loop da Questão         
-    elif game_state == 'question':
+    elif game.state == 'question' :
         question = Question(operator.operation_option)
         pygame.display.flip()
         waiting_response = True
@@ -296,21 +337,42 @@ while True:
                     exit()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_CAPSLOCK:
-                        game_state = 'running'
+                        game.state = 'running'
+
                         waiting_response = False
 
                     if event.key == pygame.K_SPACE:
                         for s in obstacle_group.sprites():
                             s.question_checkpoint.kill()
                             s.kill()
-                        game_state = 'game_over'
+                        game.state = 'game_over'
                         waiting_response = False
 
+    elif game.state == 'boss':
+        waiting_response = True
+        print('Fase BOSS')
+        while waiting_response:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.KEYDOWN = False
+                    pygame.quit()
+                    exit()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_CAPSLOCK:
+                        game.level.next_level()
+                        waiting_response = False
+
+                    if event.key == pygame.K_SPACE:
+                        for s in obstacle_group.sprites():
+                            s.question_checkpoint.kill()
+                            s.kill()
+                        game.state = 'game_over'
+                        waiting_response = False
+        
     for key in pygame.event.get():
         if key.type == pygame.QUIT:
             pygame.quit()
             exit()
-
     #Atualização do Display e FPS
     pygame.display.update()
     clock.tick(30)
