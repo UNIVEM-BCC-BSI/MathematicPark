@@ -214,13 +214,16 @@ obstacle_group = pygame.sprite.Group()
 obstacle_group.add(Obstacle("cone"))
 
 #Variáveis do cenário
+inicial_surface = pygame.image.load('img/TelaInicialReal.PNG').convert()
+# inicial_surface =pygame.transform.scale(inicial_surface, (1280, 720))
 scene_surface = pygame.image.load('img/scene.jpg').convert()
 
 #Loop do jogo
-while True:
+while True: 
     
     #Tela Inicial
     if game_state == 'start':
+        screen.blit(inicial_surface, (0,0))
         screen.blit(start_text, start_text_rect)
         pygame.display.flip()
         for key in pygame.event.get():
@@ -229,6 +232,7 @@ while True:
                 exit()
             if key.type == pygame.KEYUP:
                 game_state = 'operation'
+    
                 
     #Selecionar o Operador
     elif game_state == 'operation':
