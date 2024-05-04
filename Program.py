@@ -9,6 +9,11 @@ class Game():
     def __init__(self) -> None:
         self.state = 'start'
         self.level = Level(self)
+    
+    def kill_all_obstacles(self):
+        for s in obstacle_group.sprites():
+            s.question_checkpoint.kill()
+            s.kill()
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
@@ -163,12 +168,13 @@ class Level():
     def __init__(self, game):
         self.current_level = 0
         self.obstacles_counter = 0
-        self.all_obstacle_numbers = [1, 2, 3]
+        self.all_obstacle_numbers = [1, 5, 3]
         self.obstacles_number = self.all_obstacle_numbers[self.current_level]
         self.game = game
 
     #Serve para mexer com o contador de obstáculos da fase e passar entre fases/bosses em caso de acerto de pergunta. Retorna o valor atualizado de game_state 
     def next_level(self):
+        print("Entrnado na funcao", self.obstacles_counter, self.obstacles_number)
         if self.game.state == 'boss':
             #Se chegar no final do jogo
             if self.current_level >= len(self.all_obstacle_numbers) - 1 :
@@ -178,6 +184,8 @@ class Level():
                 self.current_level +=1
                 self.obstacles_number = self.all_obstacle_numbers[self.current_level]
                 self.obstacles_counter = 0
+                self.game.kill_all_obstacles()
+                obstacle_group.add(Obstacle("cone"))
                 self.game.state = 'running'
         else:
             self.obstacles_counter += 1
@@ -185,13 +193,13 @@ class Level():
             #Se for passar de fase
             if self.obstacles_counter >= self.obstacles_number: 
                 self.game.state = 'boss'
-            
+                self.game.kill_all_obstacles()
             else:
-                self.obstacles_counter += 1
                 #Se fase estiver concluida
                 if self.obstacles_counter >= self.obstacles_number:
                     self.game.state = 'boss'
                 else: self.game.state = 'running'
+        print("saindo da funcao", self.obstacles_counter, self.obstacles_number)
 
 
 #Checa a colisão com o obstaculo, se colidir retorna True e deleta o obstaculo e a linha e se não colidir retorna False
@@ -313,6 +321,7 @@ while True:
 
     #Tela de GameOver
     elif game.state == 'game_over':
+        game.kill_all_obstacles()
         screen.fill('black')
         screen.blit(game_over_text_surface, (400, 150))
         screen.blit(game_over_press_button_text_surface, (150, 400))
@@ -336,7 +345,7 @@ while True:
                     pygame.quit()
                     exit()
                 if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_CAPSLOCK:
+                    if event.key == pygame.K_RETURN:
                         game.state = 'running'
 
                         waiting_response = False
@@ -358,7 +367,7 @@ while True:
                     pygame.quit()
                     exit()
                 if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_CAPSLOCK:
+                    if event.key == pygame.K_RETURN:
                         game.level.next_level()
                         waiting_response = False
 
