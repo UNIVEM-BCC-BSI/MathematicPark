@@ -3,8 +3,6 @@ from sys import exit
 from random import randint
 from pygame.sprite import Group
 
-global waiting_response
-waiting_response = False
 #Classes
 
 class Game():
@@ -45,6 +43,8 @@ class Obstacle(pygame.sprite.Sprite):
         super().__init__()
         if type == "cone":
             self.image = pygame.image.load('img/cone.png').convert_alpha()
+        elif type == "boss1":
+            self.image = pygame.image.load('img/billy1.png').convert_alpha()
 
         self.rect = self.image.get_rect(midbottom = (1330, GROUND_LEVEL))
         self.question_checkpoint = QuestionCheckpoint(self)
@@ -108,136 +108,111 @@ class Operation():
 
 class Question(pygame.sprite.Sprite):
     #Pede a variavel para usar na função calculate
-    def __init__(self):
-        self.waiting_response = False
-
+    def __init__(self, operation):
+        self.operation = operation
+        self.calculate()
+        self.random_answer()
+        self.show_question()
+        self.show_answer()
+        
     
     #Gera números com o randint para fazer a conta e retorna o resultado
-    def calculate(self, operation, boss):
-        if boss:
-            if operation == '*':
-                self.num1 = randint(10, 20)
-                self.num2 = randint(10, 20)
-            
-            elif operation == '/':
-                self.num1 = randint(10, 50)
-                self.num2 = randint(10, 50)
-                while self.num1 % self.num2 != 0:
-                    self.num1 = randint(10, 50)
-                    self.num2 = randint(10, 50)
-            else:
-                self.num1 = randint(100, 200)
-                self.num2 = randint(100, 200)
-
-            while self.num2 > self.num1:
-                self.num2 = randint(100, 200)
-
-        else:
-            
-            if operation == '*':
-                self.num1 = randint(1, 10)
-                self.num2 = randint(1, 10)
-            
-            elif operation == '/':
+    def calculate(self):
+        if self.operation == '*' and not game.state == 'boss':
+            self.num1 = randint(1, 10)
+            self.num2 = randint(1, 10)
+        
+        elif self.operation == '/':
+            self.num1 = randint(1, 20)
+            self.num2 = randint(1, 10)
+            while self.num1 % self.num2 != 0:
                 self.num1 = randint(1, 20)
                 self.num2 = randint(1, 10)
-                while self.num1 % self.num2 != 0:
-                    self.num1 = randint(1, 20)
-                    self.num2 = randint(1, 10)
-            else:
-                self.num1 = randint(1, 100)
-                self.num2 = randint(1, 80)
+        else:
+            self.num1 = randint(1, 100)
+            self.num2 = randint(1, 80)
 
-            while self.num2 > self.num1:
-                self.num2 = randint(1, 80)
+        while self.num2 > self.num1:
+            self.num2 = randint(1, 80)
 
-        self.result = int(eval(str(self.num1) + operation + str(self.num2)))
+        self.result = int(eval(str(self.num1) + self.operation + str(self.num2)))
         return self.result
    
+    #Faz a aleatoriedade das questões
+    def random_answer(self):
+        self.answer = randint(1, 4)
+        print(self.answer)
+        if self.answer == 1:
+            self.response1 = self.result
+            self.response2 = self.result + 5
+            self.response3 = self.result - 3
+            self.response4 = self.result - 1
+        elif self.answer == 2:
+            self.response2 = self.result
+            self.response1 = self.result + 2
+            self.response3 = self.result - 3
+            self.response4 = self.result - 1
+        elif self.answer == 3:
+            self.response3 = self.result 
+            self.response1 = self.result + 4
+            self.response2 = self.result - 1
+            self.response4 = self.result - 2
+        else:
+            self.response4 = self.result
+            self.response1 = self.result + 1
+            self.response2 = self.result + 2
+            self.response3 = self.result - 1
+
+
     #Mostra a pergunta na tela
-    def run(self, operation, boss=False):
-        self.calculate(operation, boss)
-        question_text = question_font.render(f"{self.num1} {operation} {self.num2}", False, 'White')
+    def show_question(self):
+        question_text = question_font.render(f"{self.num1} {self.operation} {self.num2}", False, 'White')
         question_text_rect = question_text.get_rect()
         question_text_rect.center = (SCREEN_WIDTH/2, 150)
         screen.blit(question_text, question_text_rect)
-        self.show_answer()
     
     #Mostra as opções de respostas na tela
     def show_answer(self):
         
-        resp1_text = question_font.render(f"{self.result}", False, 'White')
+        resp1_text = question_font.render(f"{self.response1}", False, 'White')
         resp1_text_rect = question_text.get_rect()
         resp1_text_rect.midtop = (450, 350)
         screen.blit(resp1_text, resp1_text_rect)
 
-        resp2_text = question_font.render(f"{self.result + 5}", False, 'White')
+        resp2_text = question_font.render(f"{self.response2}", False, 'White')
         resp2_text_rect = question_text.get_rect()
         resp2_text_rect.midtop = (650, 350)
         screen.blit(resp2_text, resp2_text_rect)
 
-        resp3_text = question_font.render(f"{self.result + 2}", False, 'White')
+        resp3_text = question_font.render(f"{self.response3}", False, 'White')
         resp3_text_rect = question_text.get_rect()
         resp3_text_rect.midtop = (850, 350)
         screen.blit(resp3_text, resp3_text_rect)
 
-        resp4_text = question_font.render(f"{self.result - 3}", False, 'White')
+        resp4_text = question_font.render(f"{self.response4}", False, 'White')
         resp4_text_rect = question_text.get_rect()
         resp4_text_rect.midtop = (1050, 350)
         screen.blit(resp4_text, resp4_text_rect)     
-
-
-
-    def wait(self, boss=False):
-        if boss:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.KEYDOWN = False
-                    pygame.quit()
-                    exit()
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_RETURN:
-                        game.level.next_level()
-                        self.waiting_response = False
-
-                    if event.key == pygame.K_SPACE:
-                        for s in obstacle_group.sprites():
-                            s.question_checkpoint.kill()
-                            s.kill()
-                        game.state = 'game_over'
-                        self.waiting_response = False
-
-        else:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.KEYDOWN = False
-                    pygame.quit()
-                    exit()
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_RETURN:
-                        game.state = 'running'
-                        self.waiting_response = False
-
-                    if event.key == pygame.K_SPACE:
-                        for s in obstacle_group.sprites():
-                            s.question_checkpoint.kill()
-                            s.kill()
-                        game.state = 'game_over'
-                        self.waiting_response = False
 
 class Level():
     def __init__(self, game):
         self.current_level = 0
         self.obstacles_counter = 0
-        self.all_obstacle_numbers = [1, 2, 3]
+        self.all_obstacle_numbers = [1, 5, 3]
         self.obstacles_number = self.all_obstacle_numbers[self.current_level]
         self.game = game
 
     #Serve para mexer com o contador de obstáculos da fase e passar entre fases/bosses em caso de acerto de pergunta. Retorna o valor atualizado de game_state 
     def next_level(self):
-        print("Entrando na funcao", self.obstacles_counter, self.obstacles_number)
+
+        
+        
+        
+
+        print("Entrnado na funcao", self.obstacles_counter, self.obstacles_number)
         if self.game.state == 'boss':
-            if self.current_level >= len(self.all_obstacle_numbers) - 1 : #Se chegar no final do jogo
+            #Se chegar no final do jogo
+            if self.current_level >= len(self.all_obstacle_numbers) - 1 :
                 self.game.state = 'game_over'
             #Caso seja em boss mas não no final do jogo
             else:
@@ -247,18 +222,19 @@ class Level():
                 self.game.kill_all_obstacles()
                 obstacle_group.add(Obstacle("cone"))
                 self.game.state = 'running'
-        else: #Se matar um obstaculo    
+        else:
             self.obstacles_counter += 1
 
-            if self.obstacles_counter >= self.obstacles_number:   #Se for pro boss
+            #Se for passar de fase
+            if self.obstacles_counter >= self.obstacles_number: 
                 self.game.state = 'boss'
                 self.game.kill_all_obstacles()
-                # self.obstacles_counter = 0
-            # else: #Se nao for pro boss
                 
-            #     if self.obstacles_counter >= self.obstacles_number:
-            #         self.game.state = 'boss'
-            #     else: self.game.state = 'running'
+            else:
+                #Se fase estiver concluida
+                if self.obstacles_counter >= self.obstacles_number:
+                    self.game.state = 'boss'
+                else: self.game.state = 'running'
         print("saindo da funcao", self.obstacles_counter, self.obstacles_number)
 
 
@@ -290,7 +266,6 @@ GROUND_LEVEL = 555
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pygame.time.Clock()
 pygame.display.set_caption('Mathematic Park')
-question = Question()
 
 #Jogo
 game = Game()
@@ -395,20 +370,62 @@ while True:
                 exit()        
     
     #Loop da Questão         
-    elif game.state == 'question':
-        if not question.waiting_response:
-            question.waiting_response = True
-            question.run(operator.operation_option)
-        else:
-            question.wait()
-        
-    elif game.state == 'boss':
-        if not question.waiting_response:
-            question.waiting_response = True
-            question.run(operator.operation_option, boss=True)
-        else:
-            question.wait(boss=True)
+    elif game.state == 'question' :
+        question = Question(operator.operation_option)
+        pygame.display.flip()
+        waiting_response = True
+        while waiting_response:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.KEYDOWN = False
+                    pygame.quit()
+                    exit()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:
+                        game.state = 'running'
 
+                        waiting_response = False
+
+                    if event.key == pygame.K_SPACE:
+                        for s in obstacle_group.sprites():
+                            s.question_checkpoint.kill()
+                            s.kill()
+                        game.state = 'game_over'
+                        waiting_response = False
+
+    elif game.state == 'boss':
+        screen.blit(scene_surface, (0, -7))
+        player.draw(screen)
+        obstacle_group.draw(screen)
+
+        player.sprite.update()
+        obstacle_group.update()
+
+        if collision_obstacle() or collision_question():
+            question_boss= Question(operator.operation_option)
+            pygame.display.flip()
+            waiting_response = True
+
+            print('Fase BOSS')
+            print('pergunta do boss')
+            while waiting_response:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.KEYDOWN = False
+                        pygame.quit()
+                        exit()
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_RETURN:
+                            game.level.next_level()
+                            waiting_response = False
+
+                        if event.key == pygame.K_SPACE:
+                            for s in obstacle_group.sprites():
+                                s.question_checkpoint.kill()
+                                s.kill()
+                            game.state = 'game_over'
+                            waiting_response = False
+        
     for key in pygame.event.get():
         if key.type == pygame.QUIT:
             pygame.quit()
