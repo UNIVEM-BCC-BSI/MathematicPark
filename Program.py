@@ -18,7 +18,19 @@ class Game():
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.image.load('img/testplayer.png').convert_alpha()
+        self.running_sprites = []
+        self.running_sprites.append(pygame.image.load('img/characters/sheldon_correr1.png').convert_alpha())
+        self.running_sprites.append(pygame.image.load('img/characters/sheldon_correr2.png').convert_alpha())
+        self.running_sprites.append(pygame.image.load('img/characters/sheldon_correr3.png').convert_alpha())
+        self.jumping_sprites = []
+        self.jumping_sprites.append(pygame.image.load('img/characters/sheldon_pular1.png').convert_alpha())
+        self.jumping_sprites.append(pygame.image.load('img/characters/sheldon_pular2.png').convert_alpha())
+        self.jumping_sprites.append(pygame.image.load('img/characters/sheldon_correr3.png').convert_alpha())
+
+        self.current_sprite = 0
+        self.image = self.running_sprites[self.current_sprite]
+        self.is_jumping = False
+
         self.rect = self.image.get_rect(midbottom = (160, GROUND_LEVEL))
         self.gravity = 0
     
@@ -26,17 +38,32 @@ class Player(pygame.sprite.Sprite):
         keys = pygame.key.get_pressed()
         if (keys[pygame.K_SPACE] or keys[pygame.K_UP] or keys[pygame.K_PAGEUP]) and self.rect.bottom >= GROUND_LEVEL:
             self.gravity = -23
+            self.is_jumping = True
 
     def apply_gravity(self):
         self.gravity += 1
         self.rect.y += self.gravity
         if self.rect.bottom >= GROUND_LEVEL:
+            self.is_jumping = False
             self.rect.bottom = GROUND_LEVEL
 
     #Verifica os movimentos do player e aplica a gravidade
     def update(self):
         self.player_input()
         self.apply_gravity()
+
+        if self.is_jumping:
+            if self.gravity < -2:
+                self.current_sprite = 0
+            elif self.gravity > 2:
+                self.current_sprite = 1
+            else: self.current_sprite = 2
+            self.image = self.jumping_sprites[self.current_sprite]
+        else:
+            self.current_sprite += 0.25
+            if self.current_sprite >= 3.0:
+                self.current_sprite = 0
+            self.image = self.running_sprites[int(self.current_sprite)]
 
 class Obstacle(pygame.sprite.Sprite):
     def __init__(self, type):
@@ -263,7 +290,7 @@ obstacle_group = pygame.sprite.Group()
 obstacle_group.add(Obstacle("cone"))
 
 #Variáveis do cenário
-scene_surface = pygame.image.load('img/scene.jpg').convert()
+scene_surface = pygame.image.load('img/scenes/cenario principal.jpg').convert()
 
 #Loop do jogo
 while True:
