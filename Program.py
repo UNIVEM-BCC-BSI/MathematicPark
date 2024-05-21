@@ -9,6 +9,15 @@ class Game():
     def __init__(self) -> None:
         self.state = 'start'
         self.level = Level(self)
+        self.scenes = [
+            pygame.image.load('img/scenes/cenario principal.jpg').convert(), 
+            pygame.image.load('img/scenes/cenario principal2.jpg').convert(),
+            pygame.image.load('img/scenes/cenario principal3.jpg').convert()
+            ]
+        self.current_scene = self.scenes[self.level.current_level]
+
+    def update_scene(self):
+        self.current_scene = self.scenes[self.level.current_level]
     
     def kill_all_obstacles(self):
         for s in obstacle_group.sprites():
@@ -195,7 +204,7 @@ class Level():
     def __init__(self, game):
         self.current_level = 0
         self.obstacles_counter = 0
-        self.all_obstacle_numbers = [1, 5, 3]
+        self.all_obstacle_numbers = [1, 1, 1]
         self.obstacles_number = self.all_obstacle_numbers[self.current_level]
         self.game = game
 
@@ -209,6 +218,7 @@ class Level():
             #Caso seja em boss mas não no final do jogo
             else:
                 self.current_level +=1
+                self.game.update_scene()
                 self.obstacles_number = self.all_obstacle_numbers[self.current_level]
                 self.obstacles_counter = 0
                 self.game.kill_all_obstacles()
@@ -227,7 +237,6 @@ class Level():
                     self.game.state = 'boss'
                 else: self.game.state = 'running'
         print("saindo da funcao", self.obstacles_counter, self.obstacles_number)
-
 
 #Checa a colisão com o obstaculo, se colidir retorna True e deleta o obstaculo e a linha e se não colidir retorna False
 def collision_obstacle():
@@ -290,7 +299,8 @@ obstacle_group = pygame.sprite.Group()
 obstacle_group.add(Obstacle("cone"))
 
 #Variáveis do cenário
-scene_surface = pygame.image.load('img/scenes/cenario principal.jpg').convert()
+# scene_surface = pygame.image.load('img/scenes/cenario principal.jpg').convert()
+
 
 #Loop do jogo
 while True:
@@ -333,7 +343,7 @@ while True:
 
     #Jogo
     elif game.state == 'running':
-        screen.blit(scene_surface, (0, -7))
+        screen.blit(game.current_scene, (0, -7))
         player.draw(screen)
         obstacle_group.draw(screen)
 
