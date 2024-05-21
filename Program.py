@@ -1,6 +1,7 @@
 import pygame
 from sys import exit
 from random import randint
+from time import sleep
 from pygame.sprite import Group
 
 #Classes
@@ -136,6 +137,7 @@ class Question(pygame.sprite.Sprite):
     def __init__(self, operation):
         self.operation = operation
         self.calculate()
+        self.random_answer()
         self.show_question()
         self.show_answer()
     
@@ -160,7 +162,32 @@ class Question(pygame.sprite.Sprite):
 
         self.result = int(eval(str(self.num1) + self.operation + str(self.num2)))
         return self.result
-   
+    
+    #Faz a aleatoriedade das questões
+    def random_answer(self):
+        self.answer = randint(1, 4)
+        print(self.answer)
+        if self.answer == 1:
+            self.response1 = self.result
+            self.response2 = self.result + 5
+            self.response3 = self.result - 3
+            self.response4 = self.result - 1
+        elif self.answer == 2:
+            self.response2 = self.result
+            self.response1 = self.result + 2
+            self.response3 = self.result - 3
+            self.response4 = self.result - 1
+        elif self.answer == 3:
+            self.response3 = self.result 
+            self.response1 = self.result + 4
+            self.response2 = self.result - 1
+            self.response4 = self.result - 2
+        else:
+            self.response4 = self.result
+            self.response1 = self.result + 1
+            self.response2 = self.result + 2
+            self.response3 = self.result - 1
+
     #Mostra a pergunta na tela
     def show_question(self):
         question_text = question_font.render(f"{self.num1} {self.operation} {self.num2}", False, 'White')
@@ -171,22 +198,22 @@ class Question(pygame.sprite.Sprite):
     #Mostra as opções de respostas na tela
     def show_answer(self):
         
-        resp1_text = question_font.render(f"{self.result}", False, 'White')
+        resp1_text = question_font.render(f"{self.response1}", False, 'White')
         resp1_text_rect = question_text.get_rect()
         resp1_text_rect.midtop = (450, 350)
         screen.blit(resp1_text, resp1_text_rect)
 
-        resp2_text = question_font.render(f"{self.result + 5}", False, 'White')
+        resp2_text = question_font.render(f"{self.response2}", False, 'White')
         resp2_text_rect = question_text.get_rect()
         resp2_text_rect.midtop = (650, 350)
         screen.blit(resp2_text, resp2_text_rect)
 
-        resp3_text = question_font.render(f"{self.result + 2}", False, 'White')
+        resp3_text = question_font.render(f"{self.response3}", False, 'White')
         resp3_text_rect = question_text.get_rect()
         resp3_text_rect.midtop = (850, 350)
         screen.blit(resp3_text, resp3_text_rect)
 
-        resp4_text = question_font.render(f"{self.result - 3}", False, 'White')
+        resp4_text = question_font.render(f"{self.response4}", False, 'White')
         resp4_text_rect = question_text.get_rect()
         resp4_text_rect.midtop = (1050, 350)
         screen.blit(resp4_text, resp4_text_rect)     
@@ -198,6 +225,22 @@ class Level():
         self.all_obstacle_numbers = [1, 5, 3]
         self.obstacles_number = self.all_obstacle_numbers[self.current_level]
         self.game = game
+        self.level_state = True
+        self.count_level = 1
+
+    def screen_level(self):
+        if self.level_state:
+            screen.fill('black')
+            level_text = level_font.render(f"Fase {self.count_level}", False, 'White')
+            level_text_rect = level_text.get_rect()
+            level_text_rect.midtop = (620, SCREEN_HEIGHT/2)
+            screen.blit(level_text, level_text_rect)
+            pygame.display.flip()
+            sleep(3)
+            self.count_level += 1
+            self.level_state = False
+        
+            
 
     #Serve para mexer com o contador de obstáculos da fase e passar entre fases/bosses em caso de acerto de pergunta. Retorna o valor atualizado de game_state 
     def next_level(self):
@@ -213,6 +256,7 @@ class Level():
                 self.obstacles_counter = 0
                 self.game.kill_all_obstacles()
                 obstacle_group.add(Obstacle("cone"))
+                self.level_state = True
                 self.game.state = 'running'
         else:
             self.obstacles_counter += 1
@@ -266,17 +310,20 @@ title_font = pygame.font.Font('ARCADECLASSIC.TTF', 100)
 subtitle_font = pygame.font.Font('ARCADECLASSIC.TTF', 50)
 start_font = pygame.font.Font('ARCADECLASSIC.TTF', 32)
 operation_screen_font = pygame.font.Font('arial.TTF', 32)
+level_font = pygame.font.Font('ARCADECLASSIC.TTF', 80)
 question_font = pygame.font.Font('arial.TTF', 32)
 
 game_over_text_surface = title_font.render('Voce  perdeu', False, 'yellow')
 game_over_press_button_text_surface = subtitle_font.render('Pressione  espaco  para  tentar  novamente', False, 'White')
 start_text = start_font.render('Pressione  qualquer  tecla  para  jogar', False, 'White')
-
+level_text = level_font.render(f"Fase", False, 'White')
 question_text_surface = subtitle_font.render("Pergunta", False, 'Black')
 question_text = question_font.render('Digite um Número', False, 'White')
 
 start_text_rect = start_text.get_rect()
 start_text_rect.midtop = (SCREEN_WIDTH/2, 500)
+level_text_rect = level_text.get_rect()
+level_text_rect.center = (SCREEN_WIDTH/2, SCREEN_HEIGHT/2)
 question_text_rect = question_text.get_rect()
 question_text_rect.center = (SCREEN_WIDTH/2, 400)
 
@@ -333,6 +380,7 @@ while True:
 
     #Jogo
     elif game.state == 'running':
+        game.level.screen_level()
         screen.blit(scene_surface, (0, -7))
         player.draw(screen)
         obstacle_group.draw(screen)
