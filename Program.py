@@ -1,4 +1,5 @@
 import pygame
+import sys
 from sys import exit
 from random import randint
 from time import sleep
@@ -105,27 +106,27 @@ class QuestionCheckpoint(pygame.sprite.Sprite):
 class Operation():
     #Texto para pedir a operação
     def operation_text(self):
-        operation_text = operation_screen_font.render(f"Selecione qual Operação você quer jogar!!", False, 'White')
+        operation_text = operation_screen_font.render(f"Selecione a operação", False, 'black')
         operation_text_rect = operation_text.get_rect()
         operation_text_rect.center = (SCREEN_WIDTH/2, 150)
         screen.blit(operation_text, operation_text_rect)
 
-        operation_sum_text = operation_screen_font.render(f"Soma", False, 'White')
+        operation_sum_text = operation_screen_font.render(f"Soma", False, 'black')
         operation_sum_text_rect = operation_sum_text.get_rect()
         operation_sum_text_rect.center = (350, 300)
         screen.blit(operation_sum_text, operation_sum_text_rect)
 
-        operation_sub_text = operation_screen_font.render(f"Subtração", False, 'White')
+        operation_sub_text = operation_screen_font.render(f"Subtração", False, 'black')
         operation_sub_text_rect = operation_sub_text.get_rect()
         operation_sub_text_rect.center = (850, 300)
         screen.blit(operation_sub_text, operation_sub_text_rect)
 
-        operation_mul_text = operation_screen_font.render(f"Multiplicação", False, 'White')
+        operation_mul_text = operation_screen_font.render(f"Multiplicação", False, 'black')
         operation_mul_text_rect = operation_mul_text.get_rect()
         operation_mul_text_rect.center = (350, 600)
         screen.blit(operation_mul_text, operation_mul_text_rect)
 
-        operation_div_text = operation_screen_font.render(f"Divisão", False, 'White')
+        operation_div_text = operation_screen_font.render(f"Divisão", False, 'black')
         operation_div_text_rect = operation_div_text.get_rect()
         operation_div_text_rect.center = (850, 600)
         screen.blit(operation_div_text, operation_div_text_rect)
@@ -135,6 +136,7 @@ class Operation():
         self.operation_option = operator
 
 class Question(pygame.sprite.Sprite):
+
     #Pede a variavel para usar na função calculate
     def __init__(self, operation):
         self.operation = operation
@@ -298,7 +300,32 @@ def collision_question():
         collided[0].kill()
         return True
     return False
+        
+class Button:
+    
+    def __init__(self, x, y, image,scale):
+        width = image.get_width()
+        height = image.get_height()
+        self.image = pygame.transform.scale(image,(int(width * scale), int(height *scale)))
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (x, y)
+        self.clicked = False 
 
+    def draw(self):
+        action = False
+        #get mouse position
+        pos = pygame.mouse.get_pos()
+        #check mouseover and clicked condition 
+        if  self.rect.collidepoint(pos):
+            if pygame.mouse.get_pressed()[0] == 1 and not self.clicked:
+                self.clicked = True
+                action = True 
+        if pygame.mouse.get_pressed()[0] == 0:
+            self.clicked = False
+        #draw button on the screen 
+        screen.blit(self.image,(self.rect.x, self.rect.y))
+        
+        return action
 pygame.init()
 
 # Constantes
@@ -347,24 +374,60 @@ obstacle_group.add(Obstacle("cone"))
 
 #Variáveis do cenário
 scene_surface = pygame.image.load('img/scenes/cenario principal.jpg').convert()
+inicial_surface = pygame.image.load('img/telalogo1.png').convert()
+inicial_surface =pygame.transform.scale(inicial_surface, (1280, 720))
+operacao_surface = pygame.image.load('img/telalogo1.png')
+
+
+#variáveis dos botões
+start_img = pygame.image.load('img/botaonv.png').convert_alpha()
+exit_img = pygame.image.load('img/botaonv.png').convert_alpha()
+credits_img = pygame.image.load('img/botaonv.png').convert_alpha()
+#button_img = pygame.image.load('img/butao.png').convert_alpha()
+
+
+# Calcular posições dos botões para centralizá-los na tela
+x_centro = SCREEN_WIDTH // 2
+y_iniciar = SCREEN_HEIGHT // 2 - 100
+y_creditos = SCREEN_HEIGHT // 1.85
+y_sair = SCREEN_HEIGHT // 2 + 130
+escala_start = 1
+escala_cred = 0.75
+escala_sair = 0.60
+
+# fonte do botoes e cor
+font = pygame.font.Font('arial.TTF',40)
+font_color = (255,255,255)
+
+# Instâncias dos botões
+button_start = Button(x_centro - int(start_img.get_width()* escala_start)// 2, y_iniciar, start_img,escala_start)
+button_credits = Button(x_centro - int(credits_img.get_width()*escala_cred)// 2, y_creditos, credits_img,escala_cred)
+button_exit = Button(x_centro - int(exit_img.get_width()*escala_sair)// 2, y_sair, exit_img, escala_sair)
+#button_general = Button(-330,-75,button_img,1)
 
 #Loop do jogo
-while True:
-    
-    #Tela Inicial
-    if game.state == 'start':
-        screen.blit(start_text, start_text_rect)
-        pygame.display.flip()
-        for key in pygame.event.get():
+while True: 
+    for key in pygame.event.get():
             if key.type == pygame.QUIT:
                 pygame.quit()
                 exit()
-            if key.type == pygame.KEYUP:
-                game.state = 'operation'
+    #Tela Inicial
+    if game.state == 'start':
+        screen.blit(inicial_surface, (0,0))
+        if button_start.draw():
+            game.state = 'operation'
+        elif button_credits.draw():
+            game.state = 'credits'
+        elif button_exit.draw():
+            pygame.quit()
+            sys.exit()
+            
+            
+    
                 
     #Selecionar o Operador
     elif game.state == 'operation':
-        screen.fill('black')
+        screen.blit(operacao_surface, (0,0))
         operation_screen_text = Operation()
         operation_screen_text.operation_text()
         operator = Operation()
