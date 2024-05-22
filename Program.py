@@ -9,20 +9,30 @@ class Game():
     def __init__(self) -> None:
         self.state = 'start'
         self.level = Level(self)
+        self.scene = Scene()
+
+    def kill_all_obstacles(self):
+        for s in obstacle_group.sprites():
+            s.question_checkpoint.kill()
+            s.kill()
+
+class Scene():
+    def __init__(self):
         self.scenes = [
             pygame.image.load('img/scenes/cenario principal.jpg').convert(), 
             pygame.image.load('img/scenes/cenario principal2.jpg').convert(),
             pygame.image.load('img/scenes/cenario principal3.jpg').convert()
             ]
+        self.scene_pos = 0
         self.current_scene = self.scenes[self.level.current_level]
 
-    def update_scene(self):
+    def change_scene(self):
         self.current_scene = self.scenes[self.level.current_level]
-    
-    def kill_all_obstacles(self):
-        for s in obstacle_group.sprites():
-            s.question_checkpoint.kill()
-            s.kill()
+        self.scene_pos = 0
+
+    def update(self):
+        self.scene_pos += 12
+        screen.blit(self.current_scene, (self.scene_pos, 0))
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
@@ -218,7 +228,7 @@ class Level():
             #Caso seja em boss mas não no final do jogo
             else:
                 self.current_level +=1
-                self.game.update_scene()
+                self.game.scene
                 self.obstacles_number = self.all_obstacle_numbers[self.current_level]
                 self.obstacles_counter = 0
                 self.game.kill_all_obstacles()
