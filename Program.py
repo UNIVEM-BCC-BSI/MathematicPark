@@ -195,6 +195,7 @@ class Button:
             self.clicked = False
         #draw button on the screen 
         screen.blit(self.image,(self.rect.x, self.rect.y))
+        
         return action
 pygame.init()
 
@@ -260,6 +261,10 @@ y_sair = SCREEN_HEIGHT // 2 + 130
 escala_start = 1
 escala_cred = 0.75
 escala_sair = 0.60
+
+# fonte do botoes e cor
+font = pygame.font.Font('arial.TTF',40)
+font_color = (255,255,255)
 
 # Instâncias dos botões
 button_start = Button(x_centro - int(start_img.get_width()* escala_start)// 2, y_iniciar, start_img,escala_start)
