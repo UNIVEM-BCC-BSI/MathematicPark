@@ -246,23 +246,25 @@ operacao_surface = pygame.image.load('img/telalogo1.png')
 scene_surface = pygame.image.load('img/scene.jpg').convert()
 
 #variáveis dos botões
-start_img = pygame.image.load('img/botao_comecar.png').convert_alpha()
-exit_img = pygame.image.load('img/bota_sair.png').convert_alpha()
-credits_img = pygame.image.load('img/botao_creditos.png').convert_alpha()
+start_img = pygame.image.load('img/botaonv.png').convert_alpha()
+exit_img = pygame.image.load('img/botaonv.png').convert_alpha()
+credits_img = pygame.image.load('img/botaonv.png').convert_alpha()
 #button_img = pygame.image.load('img/butao.png').convert_alpha()
 
 
 # Calcular posições dos botões para centralizá-los na tela
 x_centro = SCREEN_WIDTH // 2
 y_iniciar = SCREEN_HEIGHT // 2 - 100
-y_sair = SCREEN_HEIGHT // 2
-y_creditos = SCREEN_HEIGHT // 2 + 100
-escala_botao = 2
+y_creditos = SCREEN_HEIGHT // 1.85
+y_sair = SCREEN_HEIGHT // 2 + 130
+escala_start = 1
+escala_cred = 0.75
+escala_sair = 0.60
 
 # Instâncias dos botões
-button_start = Button(x_centro - int(start_img.get_width()* escala_botao)// 2, y_iniciar, start_img,escala_botao)
-button_credits = Button(x_centro - int(credits_img.get_width()*escala_botao)// 2, y_sair, credits_img,escala_botao)
-button_exit = Button(x_centro - int(exit_img.get_width()*escala_botao)// 2, y_creditos, exit_img, escala_botao)
+button_start = Button(x_centro - int(start_img.get_width()* escala_start)// 2, y_iniciar, start_img,escala_start)
+button_credits = Button(x_centro - int(credits_img.get_width()*escala_cred)// 2, y_creditos, credits_img,escala_cred)
+button_exit = Button(x_centro - int(exit_img.get_width()*escala_sair)// 2, y_sair, exit_img, escala_sair)
 #button_general = Button(-330,-75,button_img,1)
 
 #Loop do jogo
