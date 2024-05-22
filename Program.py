@@ -1,6 +1,7 @@
 import pygame
 from sys import exit
 from random import randint
+from time import sleep
 from pygame.sprite import Group
 
 #Classes
@@ -18,7 +19,19 @@ class Game():
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.image.load('img/testplayer.png').convert_alpha()
+        self.running_sprites = []
+        self.running_sprites.append(pygame.image.load('img/characters/sheldon_correr1.png').convert_alpha())
+        self.running_sprites.append(pygame.image.load('img/characters/sheldon_correr2.png').convert_alpha())
+        self.running_sprites.append(pygame.image.load('img/characters/sheldon_correr3.png').convert_alpha())
+        self.jumping_sprites = []
+        self.jumping_sprites.append(pygame.image.load('img/characters/sheldon_pular1.png').convert_alpha())
+        self.jumping_sprites.append(pygame.image.load('img/characters/sheldon_pular2.png').convert_alpha())
+        self.jumping_sprites.append(pygame.image.load('img/characters/sheldon_correr3.png').convert_alpha())
+
+        self.current_sprite = 0
+        self.image = self.running_sprites[self.current_sprite]
+        self.is_jumping = False
+
         self.rect = self.image.get_rect(midbottom = (160, GROUND_LEVEL))
         self.gravity = 0
     
@@ -26,17 +39,32 @@ class Player(pygame.sprite.Sprite):
         keys = pygame.key.get_pressed()
         if (keys[pygame.K_SPACE] or keys[pygame.K_UP] or keys[pygame.K_PAGEUP]) and self.rect.bottom >= GROUND_LEVEL:
             self.gravity = -23
+            self.is_jumping = True
 
     def apply_gravity(self):
         self.gravity += 1
         self.rect.y += self.gravity
         if self.rect.bottom >= GROUND_LEVEL:
+            self.is_jumping = False
             self.rect.bottom = GROUND_LEVEL
 
     #Verifica os movimentos do player e aplica a gravidade
     def update(self):
         self.player_input()
         self.apply_gravity()
+
+        if self.is_jumping:
+            if self.gravity < -2:
+                self.current_sprite = 0
+            elif self.gravity > 2:
+                self.current_sprite = 1
+            else: self.current_sprite = 2
+            self.image = self.jumping_sprites[self.current_sprite]
+        else:
+            self.current_sprite += 0.25
+            if self.current_sprite >= 3.0:
+                self.current_sprite = 0
+            self.image = self.running_sprites[int(self.current_sprite)]
 
 class Obstacle(pygame.sprite.Sprite):
     def __init__(self, type):
@@ -137,7 +165,7 @@ class Question(pygame.sprite.Sprite):
 
         self.result = int(eval(str(self.num1) + self.operation + str(self.num2)))
         return self.result
-   
+    
     #Faz a aleatoriedade das questões
     def random_answer(self):
         self.answer = randint(1, 4)
@@ -162,7 +190,6 @@ class Question(pygame.sprite.Sprite):
             self.response1 = self.result + 1
             self.response2 = self.result + 2
             self.response3 = self.result - 1
-
 
     #Mostra a pergunta na tela
     def show_question(self):
@@ -201,6 +228,22 @@ class Level():
         self.all_obstacle_numbers = [1, 5, 3]
         self.obstacles_number = self.all_obstacle_numbers[self.current_level]
         self.game = game
+        self.level_state = True
+        self.count_level = 1
+
+    def screen_level(self):
+        if self.level_state:
+            screen.fill('black')
+            level_text = level_font.render(f"Fase {self.count_level}", False, 'White')
+            level_text_rect = level_text.get_rect()
+            level_text_rect.midtop = (620, SCREEN_HEIGHT/2)
+            screen.blit(level_text, level_text_rect)
+            pygame.display.flip()
+            sleep(3)
+            self.count_level += 1
+            self.level_state = False
+        
+            
 
     #Serve para mexer com o contador de obstáculos da fase e passar entre fases/bosses em caso de acerto de pergunta. Retorna o valor atualizado de game_state 
     def next_level(self):
@@ -221,6 +264,7 @@ class Level():
                 self.obstacles_counter = 0
                 self.game.kill_all_obstacles()
                 obstacle_group.add(Obstacle("cone"))
+                self.level_state = True
                 self.game.state = 'running'
         else:
             self.obstacles_counter += 1
@@ -275,17 +319,20 @@ title_font = pygame.font.Font('ARCADECLASSIC.TTF', 100)
 subtitle_font = pygame.font.Font('ARCADECLASSIC.TTF', 50)
 start_font = pygame.font.Font('ARCADECLASSIC.TTF', 32)
 operation_screen_font = pygame.font.Font('arial.TTF', 32)
+level_font = pygame.font.Font('ARCADECLASSIC.TTF', 80)
 question_font = pygame.font.Font('arial.TTF', 32)
 
 game_over_text_surface = title_font.render('Voce  perdeu', False, 'yellow')
 game_over_press_button_text_surface = subtitle_font.render('Pressione  espaco  para  tentar  novamente', False, 'White')
 start_text = start_font.render('Pressione  qualquer  tecla  para  jogar', False, 'White')
-
+level_text = level_font.render(f"Fase", False, 'White')
 question_text_surface = subtitle_font.render("Pergunta", False, 'Black')
 question_text = question_font.render('Digite um Número', False, 'White')
 
 start_text_rect = start_text.get_rect()
 start_text_rect.midtop = (SCREEN_WIDTH/2, 500)
+level_text_rect = level_text.get_rect()
+level_text_rect.center = (SCREEN_WIDTH/2, SCREEN_HEIGHT/2)
 question_text_rect = question_text.get_rect()
 question_text_rect.center = (SCREEN_WIDTH/2, 400)
 
@@ -299,7 +346,7 @@ obstacle_group = pygame.sprite.Group()
 obstacle_group.add(Obstacle("cone"))
 
 #Variáveis do cenário
-scene_surface = pygame.image.load('img/scene.jpg').convert()
+scene_surface = pygame.image.load('img/scenes/cenario principal.jpg').convert()
 
 #Loop do jogo
 while True:
@@ -342,6 +389,7 @@ while True:
 
     #Jogo
     elif game.state == 'running':
+        game.level.screen_level()
         screen.blit(scene_surface, (0, -7))
         player.draw(screen)
         obstacle_group.draw(screen)
