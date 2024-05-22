@@ -24,14 +24,16 @@ class Scene():
             pygame.image.load('img/scenes/cenario principal3.jpg').convert()
             ]
         self.scene_pos = 0
-        self.current_scene = self.scenes[self.level.current_level]
+        self.current_scene = self.scenes[0]
 
-    def change_scene(self):
-        self.current_scene = self.scenes[self.level.current_level]
+    def change_scene(self, level):
+        self.current_scene = self.scenes[level]
         self.scene_pos = 0
 
     def update(self):
-        self.scene_pos += 12
+        self.scene_pos -= 12
+    
+    def draw(self):
         screen.blit(self.current_scene, (self.scene_pos, 0))
 
 class Player(pygame.sprite.Sprite):
@@ -228,7 +230,7 @@ class Level():
             #Caso seja em boss mas não no final do jogo
             else:
                 self.current_level +=1
-                self.game.scene
+                scene.change_scene(self.current_level)
                 self.obstacles_number = self.all_obstacle_numbers[self.current_level]
                 self.obstacles_counter = 0
                 self.game.kill_all_obstacles()
@@ -308,6 +310,8 @@ question_checkpoint_group = pygame.sprite.Group()
 obstacle_group = pygame.sprite.Group()
 obstacle_group.add(Obstacle("cone"))
 
+scene = Scene()
+
 #Variáveis do cenário
 # scene_surface = pygame.image.load('img/scenes/cenario principal.jpg').convert()
 
@@ -353,10 +357,11 @@ while True:
 
     #Jogo
     elif game.state == 'running':
-        screen.blit(game.current_scene, (0, -7))
+        scene.draw()
         player.draw(screen)
         obstacle_group.draw(screen)
 
+        scene.update()
         player.sprite.update()
         obstacle_group.update()
 
