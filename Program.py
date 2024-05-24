@@ -11,11 +11,66 @@ class Game():
     def __init__(self) -> None:
         self.state = 'start'
         self.level = Level(self)
-    
+        self.scene = Scene()
+
     def kill_all_obstacles(self):
         for s in obstacle_group.sprites():
             s.question_checkpoint.kill()
             s.kill()
+
+class Scene():
+    def __init__(self):
+        self.scene_pos = 0
+        self.scene = pygame.image.load('img/scenes/scene.png').convert()
+        self.HOUSES = [
+            pygame.image.load('img/scenes/casas/casa_1.png'),
+            pygame.image.load('img/scenes/casas/casa_2.png'),
+            pygame.image.load('img/scenes/casas/casa_3.png'),
+            pygame.image.load('img/scenes/casas/casa_4.png'),
+            pygame.image.load('img/scenes/casas/casa_5.png'),
+            pygame.image.load('img/scenes/casas/casa_6.png'),
+            pygame.image.load('img/scenes/casas/casa_7.png')
+        ]
+        self.start_house_active = False
+        self.end_house_active = False
+        self.start_house = self.HOUSES[0]
+        self.end_house = self.HOUSES[1]
+        self.spawn_house(True)
+
+    def update(self):
+        self.scene_pos -= 12
+        screen.blit(self.scene, (self.scene_pos, 0))
+        screen.blit(self.scene, (self.scene_pos + self.scene.get_width(), 0))
+        if self.scene_pos <= -self.scene.get_width():
+            self.scene_pos = 0
+        
+        #houses
+        if self.start_house_active:
+            self.start_house_rect.centerx -= 12
+            if self.start_house_rect.centerx < -100:
+                self.start_house_active = False
+            screen.blit(self.start_house, self.start_house_rect)
+        if self.end_house_active:
+            self.end_rect.centerx -= 12
+            screen.blit(self.start_house, self.end_house_rect)
+
+    def spawn_house(self, on_start: bool = False):
+        if on_start:
+            self.start_house_active = True
+            self.start_house_rect = self.start_house.get_rect()
+            self.start_house_rect.bottom = GROUND_LEVEL - 101
+            self.start_house_rect.centerx = 160
+        else:
+            self.end_house_active = True
+            self.end_house_rect = self.end_house.get_rect()
+            self.end_house_rect.bottom = GROUND_LEVEL - 101
+            self.end_house_rect.left = 1280
+    
+    def change_house(self, level : int):
+        self.start_house = self.HOUSES[level]
+        self.end_house = self.HOUSES[level + 1]
+        self.end_house_active = False
+        self.spawn_house(True)
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
@@ -71,9 +126,9 @@ class Obstacle(pygame.sprite.Sprite):
     def __init__(self, type):
         super().__init__()
         if type == "cone":
-            self.image = pygame.image.load('img/cone.png').convert_alpha()
-        elif type == "boss1":
-            self.image = pygame.image.load('img/billy1.png').convert_alpha()
+            self.image = pygame.transform.scale_by(pygame.image.load('img/obstacles/cone.png').convert_alpha(), 1.4)
+        elif type == "boss":
+            self.image = BOSSES[game.level.current_level]
 
         self.rect = self.image.get_rect(midbottom = (1330, GROUND_LEVEL))
         self.question_checkpoint = QuestionCheckpoint(self)
@@ -86,7 +141,8 @@ class Obstacle(pygame.sprite.Sprite):
             self.question_checkpoint.kill()
             game.level.next_level()
             self.kill()
-            obstacle_group.add(Obstacle("cone"))
+            if game.state == 'running':
+                obstacle_group.add(Obstacle("cone"))
             del self
         else:
             self.question_checkpoint.update()
@@ -145,7 +201,6 @@ class Question(pygame.sprite.Sprite):
         self.show_question()
         self.show_answer()
         
-    
     #Gera números com o randint para fazer a conta e retorna o resultado
     def calculate(self):
         if self.operation == '*' and not game.state == 'boss':
@@ -227,7 +282,7 @@ class Level():
     def __init__(self, game):
         self.current_level = 0
         self.obstacles_counter = 0
-        self.all_obstacle_numbers = [1, 5, 3]
+        self.all_obstacle_numbers = [1, 1, 1]
         self.obstacles_number = self.all_obstacle_numbers[self.current_level]
         self.game = game
         self.level_state = True
@@ -244,15 +299,9 @@ class Level():
             sleep(3)
             self.count_level += 1
             self.level_state = False
-        
-            
 
     #Serve para mexer com o contador de obstáculos da fase e passar entre fases/bosses em caso de acerto de pergunta. Retorna o valor atualizado de game_state 
     def next_level(self):
-
-        
-        
-        
 
         print("Entrnado na funcao", self.obstacles_counter, self.obstacles_number)
         if self.game.state == 'boss':
@@ -262,6 +311,7 @@ class Level():
             #Caso seja em boss mas não no final do jogo
             else:
                 self.current_level +=1
+                #TODO: Update house
                 self.obstacles_number = self.all_obstacle_numbers[self.current_level]
                 self.obstacles_counter = 0
                 self.game.kill_all_obstacles()
@@ -273,8 +323,10 @@ class Level():
 
             #Se for passar de fase
             if self.obstacles_counter >= self.obstacles_number: 
+                
                 self.game.state = 'boss'
                 self.game.kill_all_obstacles()
+                obstacle_group.add(Obstacle("boss"))
                 
             else:
                 #Se fase estiver concluida
@@ -282,7 +334,6 @@ class Level():
                     self.game.state = 'boss'
                 else: self.game.state = 'running'
         print("saindo da funcao", self.obstacles_counter, self.obstacles_number)
-
 
 #Checa a colisão com o obstaculo, se colidir retorna True e deleta o obstaculo e a linha e se não colidir retorna False
 def collision_obstacle():
@@ -301,8 +352,7 @@ def collision_question():
         return True
     return False
         
-class Button:
-    
+class Button: 
     def __init__(self, x, y, image,scale):
         width = image.get_width()
         height = image.get_height()
@@ -372,8 +422,15 @@ question_checkpoint_group = pygame.sprite.Group()
 obstacle_group = pygame.sprite.Group()
 obstacle_group.add(Obstacle("cone"))
 
+scene = Scene()
+
+BOSSES = [
+    pygame.transform.scale_by(pygame.image.load('img/characters/billy.png').convert_alpha(), 1.1),
+    pygame.transform.scale_by(pygame.image.load('img/characters/alberto.png').convert_alpha(), 1.4),
+    pygame.transform.scale_by(pygame.image.load('img/characters/policialterry.png').convert_alpha(), 1.75),
+]
+
 #Variáveis do cenário
-scene_surface = pygame.image.load('img/scenes/cenario principal.jpg').convert()
 inicial_surface = pygame.image.load('img/telalogo1.png').convert()
 inicial_surface =pygame.transform.scale(inicial_surface, (1280, 720))
 operacao_surface = pygame.image.load('img/telalogo1.png')
@@ -421,10 +478,7 @@ while True:
         elif button_exit.draw():
             pygame.quit()
             sys.exit()
-            
-            
-    
-                
+               
     #Selecionar o Operador
     elif game.state == 'operation':
         screen.blit(operacao_surface, (0,0))
@@ -452,8 +506,7 @@ while True:
 
     #Jogo
     elif game.state == 'running':
-        game.level.screen_level()
-        screen.blit(scene_surface, (0, -7))
+        scene.update()
         player.draw(screen)
         obstacle_group.draw(screen)
 
@@ -505,7 +558,7 @@ while True:
                         waiting_response = False
 
     elif game.state == 'boss':
-        screen.blit(scene_surface, (0, -7))
+        scene.update()
         player.draw(screen)
         obstacle_group.draw(screen)
 
