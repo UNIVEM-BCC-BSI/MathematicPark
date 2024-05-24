@@ -18,23 +18,57 @@ class Game():
 
 class Scene():
     def __init__(self):
-        self.scenes = [
-            pygame.image.load('img/scenes/cenario principal.jpg').convert(), 
-            pygame.image.load('img/scenes/cenario principal2.jpg').convert(),
-            pygame.image.load('img/scenes/cenario principal3.jpg').convert()
-            ]
         self.scene_pos = 0
-        self.current_scene = self.scenes[0]
-
-    def change_scene(self, level):
-        self.current_scene = self.scenes[level]
-        self.scene_pos = 0
+        self.scene = pygame.image.load('img/scenes/scene.png').convert()
+        self.HOUSES = [
+            pygame.image.load('img/scenes/casas/casa_1.png'),
+            pygame.image.load('img/scenes/casas/casa_2.png'),
+            pygame.image.load('img/scenes/casas/casa_3.png'),
+            pygame.image.load('img/scenes/casas/casa_4.png'),
+            pygame.image.load('img/scenes/casas/casa_5.png'),
+            pygame.image.load('img/scenes/casas/casa_6.png'),
+            pygame.image.load('img/scenes/casas/casa_7.png')
+        ]
+        self.start_house_active = False
+        self.end_house_active = False
+        self.start_house = self.HOUSES[0]
+        self.end_house = self.HOUSES[1]
+        self.spawn_house(True)
 
     def update(self):
         self.scene_pos -= 12
+        screen.blit(self.scene, (self.scene_pos, 0))
+        screen.blit(self.scene, (self.scene_pos + self.scene.get_width(), 0))
+        if self.scene_pos <= -self.scene.get_width():
+            self.scene_pos = 0
+        
+        #houses
+        if self.start_house_active:
+            self.start_house_rect.centerx -= 12
+            if self.start_house_rect.centerx < -100:
+                self.start_house_active = False
+            screen.blit(self.start_house, self.start_house_rect)
+        if self.end_house_active:
+            self.end_rect.centerx -= 12
+            screen.blit(self.start_house, self.end_house_rect)
+
+    def spawn_house(self, on_start: bool = False):
+        if on_start:
+            self.start_house_active = True
+            self.start_house_rect = self.start_house.get_rect()
+            self.start_house_rect.bottom = GROUND_LEVEL - 101
+            self.start_house_rect.centerx = 160
+        else:
+            self.end_house_active = True
+            self.end_house_rect = self.end_house.get_rect()
+            self.end_house_rect.bottom = GROUND_LEVEL - 101
+            self.end_house_rect.left = 1280
     
-    def draw(self):
-        screen.blit(self.current_scene, (self.scene_pos, 0))
+    def change_house(self, level : int):
+        self.start_house = self.HOUSES[level]
+        self.end_house = self.HOUSES[level + 1]
+        self.end_house_active = False
+        self.spawn_house(True)
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
@@ -124,7 +158,6 @@ class Boss(pygame.sprite.Sprite):
     #Faz o movimento do obstaculo e atualiza a linha, se o obstaculo sair da tela ele é deletado e é adicionado outro 
     def update(self):
         self.rect.x -= 12
-
 
 class QuestionCheckpoint(pygame.sprite.Sprite):
     def __init__(self, Obstacle):
@@ -248,7 +281,7 @@ class Level():
             #Caso seja em boss mas não no final do jogo
             else:
                 self.current_level +=1
-                scene.change_scene(self.current_level)
+                #TODO: Update house
                 self.obstacles_number = self.all_obstacle_numbers[self.current_level]
                 self.obstacles_counter = 0
                 self.game.kill_all_obstacles()
@@ -259,6 +292,7 @@ class Level():
 
             #Se for passar de fase
             if self.obstacles_counter >= self.obstacles_number: 
+                
                 self.game.state = 'boss'
                 self.game.kill_all_obstacles()
             else:
@@ -375,11 +409,10 @@ while True:
 
     #Jogo
     elif game.state == 'running':
-        scene.draw()
+        scene.update()
         player.draw(screen)
         obstacle_group.draw(screen)
 
-        scene.update()
         player.sprite.update()
         obstacle_group.update()
 
