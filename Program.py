@@ -126,9 +126,9 @@ class Obstacle(pygame.sprite.Sprite):
     def __init__(self, type):
         super().__init__()
         if type == "cone":
-            self.image = pygame.image.load('img/cone.png').convert_alpha()
-        elif type == "boss1":
-            self.image = pygame.image.load('img/billy1.png').convert_alpha()
+            self.image = pygame.transform.scale_by(pygame.image.load('img/obstacles/cone.png').convert_alpha(), 1.4)
+        elif type == "boss":
+            self.image = BOSSES[game.level.current_level]
 
         self.rect = self.image.get_rect(midbottom = (1330, GROUND_LEVEL))
         self.question_checkpoint = QuestionCheckpoint(self)
@@ -141,27 +141,11 @@ class Obstacle(pygame.sprite.Sprite):
             self.question_checkpoint.kill()
             game.level.next_level()
             self.kill()
-            obstacle_group.add(Obstacle("cone"))
+            if game.state == 'running':
+                obstacle_group.add(Obstacle("cone"))
             del self
         else:
             self.question_checkpoint.update()
-
-class Boss(pygame.sprite.Sprite):
-    def __init__(self, level):
-        super().__init__()
-        self.level = level
-        self.bosses = [
-            pygame.image.load('img/characters/billy.png'),
-            pygame.image.load('img/characters/alberto.png'),
-            pygame.image.load('img/characters/policialterry.png')
-        ]
-        self.image = self.bosses[level]
-        self.rect = self.image.get_rect(midbottom = (1330, GROUND_LEVEL)).scale_by(2.5, 5)
-        # self.houses
-
-    #Faz o movimento do obstaculo e atualiza a linha, se o obstaculo sair da tela ele é deletado e é adicionado outro 
-    def update(self):
-        self.rect.x -= 12
 
 class QuestionCheckpoint(pygame.sprite.Sprite):
     def __init__(self, Obstacle):
@@ -342,6 +326,7 @@ class Level():
                 
                 self.game.state = 'boss'
                 self.game.kill_all_obstacles()
+                obstacle_group.add(Obstacle("boss"))
                 
             else:
                 #Se fase estiver concluida
@@ -439,8 +424,13 @@ obstacle_group.add(Obstacle("cone"))
 
 scene = Scene()
 
+BOSSES = [
+    pygame.transform.scale_by(pygame.image.load('img/characters/billy.png').convert_alpha(), 1.1),
+    pygame.transform.scale_by(pygame.image.load('img/characters/alberto.png').convert_alpha(), 1.4),
+    pygame.transform.scale_by(pygame.image.load('img/characters/policialterry.png').convert_alpha(), 1.75),
+]
+
 #Variáveis do cenário
-scene_surface = pygame.image.load('img/scenes/cenario principal.jpg').convert()
 inicial_surface = pygame.image.load('img/telalogo1.png').convert()
 inicial_surface =pygame.transform.scale(inicial_surface, (1280, 720))
 operacao_surface = pygame.image.load('img/telalogo1.png')
