@@ -108,6 +108,24 @@ class Obstacle(pygame.sprite.Sprite):
         else:
             self.question_checkpoint.update()
 
+class Boss(pygame.sprite.Sprite):
+    def __init__(self, level):
+        super().__init__()
+        self.level = level
+        self.bosses = [
+            pygame.image.load('img/characters/billy.png'),
+            pygame.image.load('img/characters/alberto.png'),
+            pygame.image.load('img/characters/policialterry.png')
+        ]
+        self.image = self.bosses[level]
+        self.rect = self.image.get_rect(midbottom = (1330, GROUND_LEVEL)).scale_by(2.5, 5)
+        # self.houses
+
+    #Faz o movimento do obstaculo e atualiza a linha, se o obstaculo sair da tela ele é deletado e é adicionado outro 
+    def update(self):
+        self.rect.x -= 12
+
+
 class QuestionCheckpoint(pygame.sprite.Sprite):
     def __init__(self, Obstacle):
         super().__init__()
