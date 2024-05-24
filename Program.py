@@ -131,6 +131,7 @@ class Obstacle(pygame.sprite.Sprite):
             self.image = BOSSES[game.level.current_level]
 
         self.rect = self.image.get_rect(midbottom = (1330, GROUND_LEVEL))
+
         self.question_checkpoint = QuestionCheckpoint(self)
         question_checkpoint_group.add(self.question_checkpoint)
 
@@ -157,34 +158,52 @@ class QuestionCheckpoint(pygame.sprite.Sprite):
     #Faz o movimento da linha acompanhar o obstaculo e desenha a linha
     def update(self):
         self.rect.midbottom = self.obstacle.rect.midtop
-        pygame.draw.rect(screen, (255, 0, 0), self.rect)
+        # pygame.draw.rect(screen, (255, 0, 0), self.rect)
+
+class Start():
+    def start_text(self):
+        start_text = start_font.render(f"Jogar", False, 'white')
+        start_text_rect = start_text.get_rect()
+        start_text_rect.midtop = (SCREEN_WIDTH/2, 325)
+        screen.blit(start_text, start_text_rect)
+
+        start_text = start_font.render(f"Creditos", False, 'white')
+        start_text_rect = start_text.get_rect()
+        start_text_rect.midtop = (SCREEN_WIDTH/2, 425)
+        screen.blit(start_text, start_text_rect)
+
+        start_text = start_font.render(f"Sair", False, 'white')
+        start_text_rect = start_text.get_rect()
+        start_text_rect.midtop = (SCREEN_WIDTH/2, 525)
+        screen.blit(start_text, start_text_rect)
+        
 
 class Operation():
     #Texto para pedir a operação
     def operation_text(self):
-        operation_text = operation_screen_font.render(f"Selecione a operação", False, 'black')
+        operation_text = operation_screen_font.render(f"Selecione  a  operacao", False, 'white')
         operation_text_rect = operation_text.get_rect()
-        operation_text_rect.center = (SCREEN_WIDTH/2, 150)
+        operation_text_rect.center = (SCREEN_WIDTH/2, 300)
         screen.blit(operation_text, operation_text_rect)
 
-        operation_sum_text = operation_screen_font.render(f"Soma", False, 'black')
+        operation_sum_text = operation_screen_font.render(f"Soma", False, 'white')
         operation_sum_text_rect = operation_sum_text.get_rect()
-        operation_sum_text_rect.center = (350, 300)
+        operation_sum_text_rect.center = (400, 440)
         screen.blit(operation_sum_text, operation_sum_text_rect)
 
-        operation_sub_text = operation_screen_font.render(f"Subtração", False, 'black')
+        operation_sub_text = operation_screen_font.render(f"Subtracao", False, 'white')
         operation_sub_text_rect = operation_sub_text.get_rect()
-        operation_sub_text_rect.center = (850, 300)
+        operation_sub_text_rect.center = (800, 440)
         screen.blit(operation_sub_text, operation_sub_text_rect)
 
-        operation_mul_text = operation_screen_font.render(f"Multiplicação", False, 'black')
+        operation_mul_text = operation_screen_font.render(f"Multiplicacao", False, 'white')
         operation_mul_text_rect = operation_mul_text.get_rect()
-        operation_mul_text_rect.center = (350, 600)
+        operation_mul_text_rect.center = (400, 540)
         screen.blit(operation_mul_text, operation_mul_text_rect)
 
-        operation_div_text = operation_screen_font.render(f"Divisão", False, 'black')
+        operation_div_text = operation_screen_font.render(f"Divisao", False, 'white')
         operation_div_text_rect = operation_div_text.get_rect()
-        operation_div_text_rect.center = (850, 600)
+        operation_div_text_rect.center = (800, 540)
         screen.blit(operation_div_text, operation_div_text_rect)
     
     #puxa o operador em string para ser utilizado pela questão
@@ -200,7 +219,7 @@ class Question(pygame.sprite.Sprite):
         self.random_answer()
         self.show_question()
         self.show_answer()
-        
+    
     #Gera números com o randint para fazer a conta e retorna o resultado
     def calculate(self):
         if self.operation == '*' and not game.state == 'boss':
@@ -222,7 +241,7 @@ class Question(pygame.sprite.Sprite):
 
         self.result = int(eval(str(self.num1) + self.operation + str(self.num2)))
         return self.result
-    
+   
     #Faz a aleatoriedade das questões
     def random_answer(self):
         self.answer = randint(1, 4)
@@ -250,34 +269,48 @@ class Question(pygame.sprite.Sprite):
 
     #Mostra a pergunta na tela
     def show_question(self):
-        question_text = question_font.render(f"{self.num1} {self.operation} {self.num2}", False, 'White')
+        question_text = question_font.render(f"{self.num1} { 'x' if self.operation == '*' else self.operation } {self.num2}", False, 'White')
         question_text_rect = question_text.get_rect()
         question_text_rect.center = (SCREEN_WIDTH/2, 150)
         screen.blit(question_text, question_text_rect)
-    
     #Mostra as opções de respostas na tela
     def show_answer(self):
         
         resp1_text = question_font.render(f"{self.response1}", False, 'White')
         resp1_text_rect = question_text.get_rect()
-        resp1_text_rect.midtop = (450, 350)
+        resp1_text_rect.midtop = (515, 358)
         screen.blit(resp1_text, resp1_text_rect)
 
         resp2_text = question_font.render(f"{self.response2}", False, 'White')
         resp2_text_rect = question_text.get_rect()
-        resp2_text_rect.midtop = (650, 350)
+        resp2_text_rect.midtop = (715, 358)
         screen.blit(resp2_text, resp2_text_rect)
 
         resp3_text = question_font.render(f"{self.response3}", False, 'White')
         resp3_text_rect = question_text.get_rect()
-        resp3_text_rect.midtop = (850, 350)
+        resp3_text_rect.midtop = (915, 358)
         screen.blit(resp3_text, resp3_text_rect)
 
         resp4_text = question_font.render(f"{self.response4}", False, 'White')
         resp4_text_rect = question_text.get_rect()
-        resp4_text_rect.midtop = (1050, 350)
-        screen.blit(resp4_text, resp4_text_rect)     
+        resp4_text_rect.midtop = (1115, 358)
+        screen.blit(resp4_text, resp4_text_rect)
 
+    
+    def resp_incorrect(self):
+        for s in obstacle_group.sprites():
+            s.question_checkpoint.kill()
+            s.kill()
+        game.state = 'game_over'
+        print('incorrect')   
+
+    def resp_correct(self):
+            if game.state == 'question':
+                game.state = 'running'
+                print('correct')
+            else:
+                game.level.next_level()
+                print('correct')
 class Level():
     def __init__(self, game):
         self.current_level = 0
@@ -296,13 +329,12 @@ class Level():
             level_text_rect.midtop = (620, SCREEN_HEIGHT/2)
             screen.blit(level_text, level_text_rect)
             pygame.display.flip()
-            sleep(3)
+            sleep(1.5)
             self.count_level += 1
             self.level_state = False
 
     #Serve para mexer com o contador de obstáculos da fase e passar entre fases/bosses em caso de acerto de pergunta. Retorna o valor atualizado de game_state 
     def next_level(self):
-
         print("Entrnado na funcao", self.obstacles_counter, self.obstacles_number)
         if self.game.state == 'boss':
             #Se chegar no final do jogo
@@ -392,12 +424,12 @@ pygame.display.set_caption('Mathematic Park')
 game = Game()
 
 #Variáveis de texto
-title_font = pygame.font.Font('ARCADECLASSIC.TTF', 100)
-subtitle_font = pygame.font.Font('ARCADECLASSIC.TTF', 50)
-start_font = pygame.font.Font('ARCADECLASSIC.TTF', 32)
-operation_screen_font = pygame.font.Font('arial.TTF', 32)
-level_font = pygame.font.Font('ARCADECLASSIC.TTF', 80)
-question_font = pygame.font.Font('arial.TTF', 32)
+title_font = pygame.font.Font('press-start.regular.ttf', 100)
+subtitle_font = pygame.font.Font('press-start.regular.ttf', 50)
+start_font = pygame.font.Font('press-start.regular.ttf', 24)
+operation_screen_font = pygame.font.Font('press-start.regular.ttf', 18)
+level_font = pygame.font.Font('press-start.regular.ttf', 100)
+question_font = pygame.font.Font('press-start.regular.ttf', 24)
 
 game_over_text_surface = title_font.render('Voce  perdeu', False, 'yellow')
 game_over_press_button_text_surface = subtitle_font.render('Pressione  espaco  para  tentar  novamente', False, 'White')
@@ -440,26 +472,51 @@ operacao_surface = pygame.image.load('img/telalogo1.png')
 start_img = pygame.image.load('img/botaonv.png').convert_alpha()
 exit_img = pygame.image.load('img/botaonv.png').convert_alpha()
 credits_img = pygame.image.load('img/botaonv.png').convert_alpha()
+operation_img = pygame.image.load('img/botaonv.png').convert_alpha()
+question_img = pygame.image.load('img/botaonv.png').convert_alpha()
 #button_img = pygame.image.load('img/butao.png').convert_alpha()
 
 
 # Calcular posições dos botões para centralizá-los na tela
 x_centro = SCREEN_WIDTH // 2
-y_iniciar = SCREEN_HEIGHT // 2 - 100
-y_creditos = SCREEN_HEIGHT // 1.85
-y_sair = SCREEN_HEIGHT // 2 + 130
+y_iniciar = 300
+y_creditos = 400
+y_sair = 500
+x_soma = 400
+x_sub = 800
+y_soma_sub = 400
+x_mul = 400
+x_div = 800
+y_mul_div = 500
+x_q1 = 345
+x_q2 = 545
+x_q3 = 745
+x_q4 = 945
+y_q = 345
+
+#Escalas dos Botões
 escala_start = 1
 escala_cred = 0.75
 escala_sair = 0.60
+escala_operation = 0.80
+escala_question = 0.45
 
 # fonte do botoes e cor
-font = pygame.font.Font('arial.TTF',40)
+font = pygame.font.Font('press-start.regular.ttf',40)
 font_color = (255,255,255)
 
 # Instâncias dos botões
-button_start = Button(x_centro - int(start_img.get_width()* escala_start)// 2, y_iniciar, start_img,escala_start)
+button_start = Button(x_centro - int(start_img.get_width()* escala_cred)// 2, y_iniciar, start_img,escala_cred)
 button_credits = Button(x_centro - int(credits_img.get_width()*escala_cred)// 2, y_creditos, credits_img,escala_cred)
-button_exit = Button(x_centro - int(exit_img.get_width()*escala_sair)// 2, y_sair, exit_img, escala_sair)
+button_exit = Button(x_centro - int(exit_img.get_width()*escala_cred)// 2, y_sair, exit_img, escala_cred)
+button_soma = Button(x_soma - int(operation_img.get_width()*escala_operation)// 2, y_soma_sub, operation_img, escala_operation)
+button_sub = Button(x_sub - int(operation_img.get_width()*escala_operation)// 2, y_soma_sub, operation_img, escala_operation)
+button_mul = Button(x_mul - int(operation_img.get_width()*escala_operation)// 2, y_mul_div, operation_img, escala_operation)
+button_div = Button(x_div - int(operation_img.get_width()*escala_operation)// 2, y_mul_div, operation_img, escala_operation)
+button_question1 = Button(x_q1 - int(question_img.get_width()* escala_question)// 2, y_q, question_img,escala_question)
+button_question2 = Button(x_q2 - int(question_img.get_width()* escala_question)// 2, y_q, question_img,escala_question)
+button_question3 = Button(x_q3 - int(question_img.get_width()* escala_question)// 2, y_q, question_img,escala_question)
+button_question4 = Button(x_q4 - int(question_img.get_width()* escala_question)// 2, y_q, question_img,escala_question)
 #button_general = Button(-330,-75,button_img,1)
 
 #Loop do jogo
@@ -478,34 +535,35 @@ while True:
         elif button_exit.draw():
             pygame.quit()
             sys.exit()
-               
+        start_screen_text = Start()
+        start_screen_text.start_text()
+        
     #Selecionar o Operador
     elif game.state == 'operation':
         screen.blit(operacao_surface, (0,0))
-        operation_screen_text = Operation()
-        operation_screen_text.operation_text()
         operator = Operation()
-        pygame.display.flip()
+        if button_soma.draw():
+            operator.operation_option = '+'
+            game.state = 'running'
+        elif button_sub.draw():
+            operator.operation_option = '-'
+            game.state = 'running'
+        elif button_mul.draw():
+            operator.operation_option = '*'
+            game.state = 'running'
+        elif button_div.draw():
+            operator.operation_option = '/'
+            game.state = 'running'
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_1:
-                    operator.operation_option = '+'
-                    game.state = 'running'
-                if event.key == pygame.K_2:
-                    operator.operation_option = '-'
-                    game.state = 'running'
-                if event.key == pygame.K_3:
-                    operator.operation_option = '*'
-                    game.state = 'running'
-                if event.key == pygame.K_4:
-                    operator.operation_option = '/'
-                    game.state = 'running'
+                 pygame.quit()
+                 exit()
+        operation_screen_text = Operation()
+        operation_screen_text.operation_text()
 
     #Jogo
     elif game.state == 'running':
+        game.level.screen_level()
         scene.update()
         player.draw(screen)
         obstacle_group.draw(screen)
@@ -535,6 +593,10 @@ while True:
     
     #Loop da Questão         
     elif game.state == 'question' :
+        button_question1.draw()
+        button_question2.draw()
+        button_question3.draw()
+        button_question4.draw()
         question = Question(operator.operation_option)
         pygame.display.flip()
         waiting_response = True
@@ -544,51 +606,99 @@ while True:
                     pygame.KEYDOWN = False
                     pygame.quit()
                     exit()
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_RETURN:
-                        game.state = 'running'
 
+                elif button_question1.draw():
+                    if question.answer == 1:
+                        print('botao 1')
+                        question.resp_correct()
+                        waiting_response = False
+                    else:
+                        question.resp_incorrect()
                         waiting_response = False
 
-                    if event.key == pygame.K_SPACE:
-                        for s in obstacle_group.sprites():
-                            s.question_checkpoint.kill()
-                            s.kill()
-                        game.state = 'game_over'
+                elif button_question2.draw():
+                    print('botao 2')
+                    if question.answer == 2:
+                        question.resp_correct()
+                        waiting_response = False
+                    else:
+                        question.resp_incorrect()
                         waiting_response = False
 
+                elif button_question3.draw():
+                    print('botao 3')
+                    if question.answer == 3:
+                        question.resp_correct()
+                        waiting_response = False
+                    else:
+                        question.resp_incorrect()
+                        waiting_response = False
+                elif button_question4.draw():
+                    print('botao 4')
+                    if question.answer == 4:
+                        question.resp_correct()
+                        waiting_response = False
+                    else:
+                        question.resp_incorrect()
+                        waiting_response = False
+        
     elif game.state == 'boss':
-        scene.update()
-        player.draw(screen)
-        obstacle_group.draw(screen)
+            scene.update()
+            player.draw(screen)
+            obstacle_group.draw(screen)
 
-        player.sprite.update()
-        obstacle_group.update()
+            player.sprite.update()
+            obstacle_group.update()
 
-        if collision_obstacle() or collision_question():
-            question_boss= Question(operator.operation_option)
-            pygame.display.flip()
-            waiting_response = True
+            if collision_obstacle() or collision_question():
+                button_question1.draw()
+                button_question2.draw()
+                button_question3.draw()
+                button_question4.draw()
+                question = Question(operator.operation_option)
+                pygame.display.flip()
+                waiting_response = True
+                while waiting_response:
+                    for event in pygame.event.get():
+                        if event.type == pygame.QUIT:
+                            pygame.KEYDOWN = False
+                            pygame.quit()
+                            exit()
 
-            print('Fase BOSS')
-            print('pergunta do boss')
-            while waiting_response:
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        pygame.KEYDOWN = False
-                        pygame.quit()
-                        exit()
-                    if event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_RETURN:
-                            game.level.next_level()
-                            waiting_response = False
+                        elif button_question1.draw():
+                            if question.answer == 1:
+                                print('botao 1')
+                                question.resp_correct()
+                                waiting_response = False
+                            else:
+                                question.resp_incorrect()
+                                waiting_response = False
 
-                        if event.key == pygame.K_SPACE:
-                            for s in obstacle_group.sprites():
-                                s.question_checkpoint.kill()
-                                s.kill()
-                            game.state = 'game_over'
-                            waiting_response = False
+                        elif button_question2.draw():
+                            print('botao 2')
+                            if question.answer == 2:
+                                question.resp_correct()
+                                waiting_response = False
+                            else:
+                                question.resp_incorrect()
+                                waiting_response = False
+
+                        elif button_question3.draw():
+                            print('botao 3')
+                            if question.answer == 3:
+                                question.resp_correct()
+                                waiting_response = False
+                            else:
+                                question.resp_incorrect()
+                                waiting_response = False
+                        elif button_question4.draw():
+                            print('botao 4')
+                            if question.answer == 4:
+                                question.resp_correct()
+                                waiting_response = False
+                            else:
+                                question.resp_incorrect()
+                                waiting_response = False
         
     for key in pygame.event.get():
         if key.type == pygame.QUIT:
