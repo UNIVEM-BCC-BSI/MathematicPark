@@ -18,6 +18,10 @@ class Game():
             s.question_checkpoint.kill()
             s.kill()
 
+    def reset(self):
+        self.level.current_level = 0
+
+
 class Scene():
     def __init__(self):
         self.scene_pos = 0
@@ -177,7 +181,6 @@ class Start():
         start_text_rect.midtop = (SCREEN_WIDTH/2, 525)
         screen.blit(start_text, start_text_rect)
         
-
 class Operation():
     #Texto para pedir a operação
     def operation_text(self):
@@ -269,9 +272,15 @@ class Question(pygame.sprite.Sprite):
 
     #Mostra a pergunta na tela
     def show_question(self):
-        question_text = question_font.render(f"{self.num1} { 'x' if self.operation == '*' else self.operation } {self.num2}", False, 'White')
+        screen.blit(popup_question, popup_rect)
+        question_text = question_font.render(f"Quanto é {self.num1} { 'x' if self.operation == '*' else self.operation } {self.num2}?", False, 'White')
         question_text_rect = question_text.get_rect()
         question_text_rect.center = (SCREEN_WIDTH/2, 150)
+        screen.blit(question_text, question_text_rect)
+
+        question_text = question_font.render(f"Pergunta {  f'do {BOSSES_NAMES[game.level.current_level]}' if game.state == 'boss' else game.level.obstacles_counter + 1 }", False, 'White')
+        question_text_rect = question_text.get_rect()
+        question_text_rect.center = (SCREEN_WIDTH/2, 80)
         screen.blit(question_text, question_text_rect)
     #Mostra as opções de respostas na tela
     def show_answer(self):
@@ -315,7 +324,7 @@ class Level():
     def __init__(self, game):
         self.current_level = 0
         self.obstacles_counter = 0
-        self.all_obstacle_numbers = [1, 1, 1]
+        self.all_obstacle_numbers = [2, 1, 1]
         self.obstacles_number = self.all_obstacle_numbers[self.current_level]
         self.game = game
         self.level_state = True
@@ -424,15 +433,15 @@ pygame.display.set_caption('Mathematic Park')
 game = Game()
 
 #Variáveis de texto
-title_font = pygame.font.Font('press-start.regular.ttf', 100)
-subtitle_font = pygame.font.Font('press-start.regular.ttf', 50)
+title_font = pygame.font.Font('press-start.regular.ttf', 40)
+subtitle_font = pygame.font.Font('press-start.regular.ttf', 30)
 start_font = pygame.font.Font('press-start.regular.ttf', 24)
 operation_screen_font = pygame.font.Font('press-start.regular.ttf', 18)
 level_font = pygame.font.Font('press-start.regular.ttf', 100)
 question_font = pygame.font.Font('press-start.regular.ttf', 24)
 
-game_over_text_surface = title_font.render('Voce  perdeu', False, 'yellow')
-game_over_press_button_text_surface = subtitle_font.render('Pressione  espaco  para  tentar  novamente', False, 'White')
+game_over_text_surface = title_font.render('Voce perdeu', False, 'yellow')
+game_over_press_button_text_surface = subtitle_font.render('Pressione espaco para tentar novamente', False, 'White')
 start_text = start_font.render('Pressione  qualquer  tecla  para  jogar', False, 'White')
 level_text = level_font.render(f"Fase", False, 'White')
 question_text_surface = subtitle_font.render("Pergunta", False, 'Black')
@@ -461,11 +470,19 @@ BOSSES = [
     pygame.transform.scale_by(pygame.image.load('img/characters/alberto.png').convert_alpha(), 1.4),
     pygame.transform.scale_by(pygame.image.load('img/characters/policialterry.png').convert_alpha(), 1.75),
 ]
-
+BOSSES_NAMES = [
+    'Billy',
+    'Alberto',
+    'Policial Terry'
+]
 #Variáveis do cenário
 inicial_surface = pygame.image.load('img/telalogo1.png').convert()
 inicial_surface =pygame.transform.scale(inicial_surface, (1280, 720))
 operacao_surface = pygame.image.load('img/telalogo1.png')
+popup_question = pygame.transform.scale(pygame.image.load('img/screen/quadrado.png').convert_alpha(), (600, 200))
+popup_rect = popup_question.get_rect()
+popup_rect.centerx = SCREEN_WIDTH // 2
+popup_rect.y = 50
 
 
 #variáveis dos botões
