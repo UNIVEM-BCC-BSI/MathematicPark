@@ -181,27 +181,27 @@ class Start():
 class Operation():
     #Texto para pedir a operação
     def operation_text(self):
-        operation_text = operation_screen_font.render(f"Selecione  a  operacao", False, 'white')
+        operation_text = operation_screen_font.render(f"Selecione a operacao", False, 'white')
         operation_text_rect = operation_text.get_rect()
         operation_text_rect.center = (SCREEN_WIDTH/2, 300)
         screen.blit(operation_text, operation_text_rect)
 
-        operation_sum_text = operation_screen_font.render(f"Soma", False, 'white')
+        operation_sum_text = operation_screen_font.render(f"+", False, 'white')
         operation_sum_text_rect = operation_sum_text.get_rect()
         operation_sum_text_rect.center = (400, 440)
         screen.blit(operation_sum_text, operation_sum_text_rect)
 
-        operation_sub_text = operation_screen_font.render(f"Subtracao", False, 'white')
+        operation_sub_text = operation_screen_font.render(f"-", False, 'white')
         operation_sub_text_rect = operation_sub_text.get_rect()
         operation_sub_text_rect.center = (800, 440)
         screen.blit(operation_sub_text, operation_sub_text_rect)
 
-        operation_mul_text = operation_screen_font.render(f"Multiplicacao", False, 'white')
+        operation_mul_text = operation_screen_font.render(f"x", False, 'white')
         operation_mul_text_rect = operation_mul_text.get_rect()
         operation_mul_text_rect.center = (400, 540)
         screen.blit(operation_mul_text, operation_mul_text_rect)
 
-        operation_div_text = operation_screen_font.render(f"Divisao", False, 'white')
+        operation_div_text = operation_screen_font.render(f"/", False, 'white')
         operation_div_text_rect = operation_div_text.get_rect()
         operation_div_text_rect.center = (800, 540)
         screen.blit(operation_div_text, operation_div_text_rect)
@@ -427,7 +427,7 @@ game = Game()
 title_font = pygame.font.Font('press-start.regular.ttf', 100)
 subtitle_font = pygame.font.Font('press-start.regular.ttf', 50)
 start_font = pygame.font.Font('press-start.regular.ttf', 24)
-operation_screen_font = pygame.font.Font('press-start.regular.ttf', 18)
+operation_screen_font = pygame.font.Font('press-start.regular.ttf', 24)
 level_font = pygame.font.Font('press-start.regular.ttf', 100)
 question_font = pygame.font.Font('press-start.regular.ttf', 24)
 
@@ -474,7 +474,8 @@ exit_img = pygame.image.load('img/botaonv.png').convert_alpha()
 credits_img = pygame.image.load('img/botaonv.png').convert_alpha()
 operation_img = pygame.image.load('img/botaonv.png').convert_alpha()
 question_img = pygame.image.load('img/botaonv.png').convert_alpha()
-#button_img = pygame.image.load('img/butao.png').convert_alpha()
+seta_img = pygame.image.load('img/seta.png').convert_alpha()
+seta_rect = seta_img.get_rect()
 
 
 # Calcular posições dos botões para centralizá-los na tela
@@ -525,9 +526,12 @@ while True:
             if key.type == pygame.QUIT:
                 pygame.quit()
                 exit()
+    mouse_pos = pygame.mouse.get_pos()            
     #Tela Inicial
     if game.state == 'start':
         screen.blit(inicial_surface, (0,0))
+        screen.blit(seta_img, seta_rect)
+
         if button_start.draw():
             game.state = 'operation'
         elif button_credits.draw():
@@ -537,11 +541,22 @@ while True:
             sys.exit()
         start_screen_text = Start()
         start_screen_text.start_text()
+        #seta dos botoes
+        if button_start.rect.collidepoint(mouse_pos):
+            seta_rect.midright = (button_start.rect.left - 10, button_start.rect.centery)
+        elif button_credits.rect.collidepoint(mouse_pos):
+            seta_rect.midright = (button_credits.rect.left - 10, button_credits.rect.centery)
+        elif button_exit.rect.collidepoint(mouse_pos):
+            seta_rect.midright = (button_exit.rect.left - 10, button_exit.rect.centery)
+        else:
+            seta_rect.midright = (-100, -100)
         
     #Selecionar o Operador
     elif game.state == 'operation':
         screen.blit(operacao_surface, (0,0))
+        screen.blit(seta_img, seta_rect)
         operator = Operation()
+
         if button_soma.draw():
             operator.operation_option = '+'
             game.state = 'running'
@@ -560,6 +575,18 @@ while True:
                  exit()
         operation_screen_text = Operation()
         operation_screen_text.operation_text()
+
+        if button_soma.rect.collidepoint(mouse_pos):
+            seta_rect.midright = (button_soma.rect.left - 10, button_soma.rect.centery)
+        elif button_sub.rect.collidepoint(mouse_pos):
+            seta_rect.midright = (button_sub.rect.left - 10, button_sub.rect.centery)
+        elif button_mul.rect.collidepoint(mouse_pos):
+            seta_rect.midright = (button_mul.rect.left - 10, button_mul.rect.centery)
+        elif button_div.rect.collidepoint(mouse_pos):
+            seta_rect.midright = (button_div.rect.left - 10, button_div.rect.centery)
+        else:
+            seta_rect.midright = (-100, -100) 
+
 
     #Jogo
     elif game.state == 'running':
