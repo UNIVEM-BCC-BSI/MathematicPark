@@ -19,7 +19,8 @@ class Game():
             s.kill()
 
     def reset(self):
-        self.level.current_level = 0
+        self.level.current_level = self.level.current_level
+        self.level.obstacles_counter = 0
 
 
 class Scene():
@@ -180,6 +181,29 @@ class Start():
         start_text_rect = start_text.get_rect()
         start_text_rect.midtop = (SCREEN_WIDTH/2, 525)
         screen.blit(start_text, start_text_rect)
+
+class Game_Over():
+    def game_over_text(self):
+        game_over_text_surface = title_font.render('VOCE PERDEU', False, 'yellow')
+        screen.blit(game_over_text_surface, (440, 150))
+
+        game_over_press_button_text_surface = game_over_font.render('Quer Jogar Novamente?', False, 'White')
+        screen.blit(game_over_press_button_text_surface, (445, 350))
+
+        button_game_over_text = game_over_font.render(f"Recomecar", False, 'white')
+        button_game_over_text_rect = button_game_over_text.get_rect()
+        button_game_over_text_rect.midtop = (350, 530)
+        screen.blit(button_game_over_text, button_game_over_text_rect)
+
+        button_game_over_text = game_over_font.render(f"Sair", False, 'white')
+        button_game_over_text_rect = button_game_over_text.get_rect()
+        button_game_over_text_rect.midtop = (650, 530)
+        screen.blit(button_game_over_text, button_game_over_text_rect)
+
+        button_game_over_text = game_over_font.render(f"Inicio", False, 'white')
+        button_game_over_text_rect = button_game_over_text.get_rect()
+        button_game_over_text_rect.midtop = (950, 530)
+        screen.blit(button_game_over_text, button_game_over_text_rect)
         
 class Operation():
     #Texto para pedir a operação
@@ -324,7 +348,7 @@ class Level():
     def __init__(self, game):
         self.current_level = 0
         self.obstacles_counter = 0
-        self.all_obstacle_numbers = [2, 1, 1]
+        self.all_obstacle_numbers = [1, 1, 1]
         self.obstacles_number = self.all_obstacle_numbers[self.current_level]
         self.game = game
         self.level_state = True
@@ -348,7 +372,7 @@ class Level():
         if self.game.state == 'boss':
             #Se chegar no final do jogo
             if self.current_level >= len(self.all_obstacle_numbers) - 1 :
-                self.game.state = 'game_over'
+                self.game.state = 'final'
             #Caso seja em boss mas não no final do jogo
             else:
                 self.current_level +=1
@@ -439,20 +463,35 @@ start_font = pygame.font.Font('press-start.regular.ttf', 24)
 operation_screen_font = pygame.font.Font('press-start.regular.ttf', 24)
 level_font = pygame.font.Font('press-start.regular.ttf', 100)
 question_font = pygame.font.Font('press-start.regular.ttf', 24)
+game_over_font = pygame.font.Font('press-start.regular.ttf', 20)
+final_font = pygame.font.Font('press-start.regular.ttf',20)
 
-game_over_text_surface = title_font.render('Voce perdeu', False, 'yellow')
-game_over_press_button_text_surface = subtitle_font.render('Pressione espaco para tentar novamente', False, 'White')
+game_over_text_surface = title_font.render('VOCE PERDEU', False, 'yellow')
+game_over_press_button_text_surface = game_over_font.render('Pressione o botao Recomecar para iniciar o jogo', False, 'White')
+game_over_press_button_text_surface = game_over_font.render('ou o botao Sair para sair do jogo', False, 'White')
 start_text = start_font.render('Pressione  qualquer  tecla  para  jogar', False, 'White')
+credits_text = start_font.render('Voltar', False, 'White')
 level_text = level_font.render(f"Fase", False, 'White')
 question_text_surface = subtitle_font.render("Pergunta", False, 'Black')
 question_text = question_font.render('Digite um Número', False, 'White')
+final_text = final_font.render("Parabéns você venceu todos os desafios !!", False, 'yellow')
+final_start_text = final_font.render("Inicio", False, 'white')
+final_exit_text = final_font.render("Sair", False, 'white')
 
 start_text_rect = start_text.get_rect()
 start_text_rect.midtop = (SCREEN_WIDTH/2, 500)
+credits_text_rect = credits_text.get_rect()
+credits_text_rect.center = (SCREEN_WIDTH/2, 640)
 level_text_rect = level_text.get_rect()
 level_text_rect.center = (SCREEN_WIDTH/2, SCREEN_HEIGHT/2)
 question_text_rect = question_text.get_rect()
 question_text_rect.center = (SCREEN_WIDTH/2, 400)
+final_text_rect = final_text.get_rect()
+final_text_rect.center = (SCREEN_WIDTH/2, SCREEN_HEIGHT/2)
+final_start_text_rect = final_start_text.get_rect()
+final_start_text_rect.center = (450, 540)
+final_exit_text_rect = final_exit_text.get_rect()
+final_exit_text_rect.center = (850, 540)
 
 #Grupos
 player = pygame.sprite.GroupSingle()
@@ -479,7 +518,7 @@ BOSSES_NAMES = [
 inicial_surface = pygame.image.load('img/telalogo1.png').convert()
 inicial_surface =pygame.transform.scale(inicial_surface, (1280, 720))
 operacao_surface = pygame.image.load('img/telalogo1.png')
-popup_question = pygame.transform.scale(pygame.image.load('img/screen/quadrado.png').convert_alpha(), (600, 200))
+popup_question = pygame.transform.scale(pygame.image.load('img/screen/quadrado_nv.png').convert_alpha(), (600, 200))
 popup_rect = popup_question.get_rect()
 popup_rect.centerx = SCREEN_WIDTH // 2
 popup_rect.y = 50
@@ -511,6 +550,12 @@ x_q2 = 545
 x_q3 = 745
 x_q4 = 945
 y_q = 345
+x_game_over1 = 350
+x_game_over2 = 650
+x_game_over3 = 950
+y_credits = 600
+x_final1 = 450
+x_final2 = 850
 
 #Escalas dos Botões
 escala_start = 1
@@ -535,6 +580,12 @@ button_question1 = Button(x_q1 - int(question_img.get_width()* escala_question)/
 button_question2 = Button(x_q2 - int(question_img.get_width()* escala_question)// 2, y_q, question_img,escala_question)
 button_question3 = Button(x_q3 - int(question_img.get_width()* escala_question)// 2, y_q, question_img,escala_question)
 button_question4 = Button(x_q4 - int(question_img.get_width()* escala_question)// 2, y_q, question_img,escala_question)
+button_gameover = Button(x_game_over1 - int(exit_img.get_width()* escala_cred)// 2, y_sair, exit_img,escala_cred)
+button_inicio = Button(x_game_over3 - int(exit_img.get_width()*escala_cred)// 2, y_sair, exit_img, escala_cred)
+button_exit_game_over = Button(x_game_over2 - int(exit_img.get_width()*escala_cred)// 2, y_sair, exit_img, escala_cred)
+button_return = Button(x_centro - int(credits_img.get_width()*escala_cred)// 2, y_credits, credits_img,escala_cred)
+button_final_start = Button(x_final1 - int(credits_img.get_width()*escala_cred)// 2, y_sair, exit_img,escala_cred)
+button_final_exit = Button(x_final2 - int(credits_img.get_width()*escala_cred)// 2, y_sair, exit_img,escala_cred)
 #button_general = Button(-330,-75,button_img,1)
 
 #Loop do jogo
@@ -567,7 +618,25 @@ while True:
             seta_rect.midright = (button_exit.rect.left - 10, button_exit.rect.centery)
         else:
             seta_rect.midright = (-100, -100)
+    
+    #Tela de Creditos
+    elif game.state == 'credits':
+        screen.blit(operacao_surface, (0,0))
+        screen.blit(seta_img, seta_rect)
+        if button_return.draw():
+            game.state = 'start'
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                 pygame.quit()
+                 exit()
+        screen.blit(credits_text, credits_text_rect)
+        #seta dos botoes
+        if button_return.rect.collidepoint(mouse_pos):
+            seta_rect.midright = (button_return.rect.left - 10, button_return.rect.centery)
         
+        else:
+            seta_rect.midright = (-100, -100)
+
     #Selecionar o Operador
     elif game.state == 'operation':
         screen.blit(operacao_surface, (0,0))
@@ -593,6 +662,7 @@ while True:
         operation_screen_text = Operation()
         operation_screen_text.operation_text()
 
+        #Seta dos Botões
         if button_soma.rect.collidepoint(mouse_pos):
             seta_rect.midright = (button_soma.rect.left - 10, button_soma.rect.centery)
         elif button_sub.rect.collidepoint(mouse_pos):
@@ -625,16 +695,34 @@ while True:
     elif game.state == 'game_over':
         game.kill_all_obstacles()
         screen.fill('black')
-        screen.blit(game_over_text_surface, (400, 150))
-        screen.blit(game_over_press_button_text_surface, (150, 400))
-        for key in pygame.event.get():
-            if key.type == pygame.KEYDOWN:
-                game.state = 'running'  
-                obstacle_group.add(Obstacle("cone"))
-            if key.type == pygame.QUIT:
-                pygame.quit()
-                exit()        
-    
+        #screen.blit(game_over_text_surface, (400, 150))
+        #screen.blit(game_over_press_button_text_surface, (150, 400))
+        if button_gameover.draw():
+            game.state = 'running'
+            obstacle_group.add(Obstacle("cone"))
+            game.reset()
+        elif button_exit_game_over.draw():
+            pygame.quit()
+            exit()
+        elif button_inicio.draw():
+            game.state = 'start'
+            obstacle_group.add(Obstacle("cone"))
+        game_over_text = Game_Over()
+        game_over_text.game_over_text()
+             
+    #Tela Final
+    elif game.state == 'final':
+        screen.fill('black')
+        screen.blit(final_text, final_text_rect)
+        if button_final_start.draw():
+            game.state = 'start'
+            obstacle_group.add(Obstacle("cone"))
+        elif button_final_exit.draw():
+            pygame.quit()
+            exit()
+        screen.blit(final_start_text, final_start_text_rect)
+        screen.blit(final_exit_text, final_exit_text_rect)
+
     #Loop da Questão         
     elif game.state == 'question' :
         button_question1.draw()
