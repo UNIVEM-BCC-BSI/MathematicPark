@@ -21,7 +21,35 @@ class Game():
     def reset(self):
         self.level.current_level = self.level.current_level
         self.level.obstacles_counter = 0
+        self.game_music = Sound()
+        self.game_music.update_music()
+    
+class Sound():
+    def __init__(self) -> None:
+        self.game_music()
+        self.sound_effects()
+        self.update_music()
 
+    def game_music(self):
+        self.music_game = pygame.mixer_music.load('sound/game_music.mp3')
+        pygame.mixer_music.set_volume(0.09)
+        self.play_music = pygame.mixer_music.play(-1)
+        self.pause_music = pygame.mixer_music.pause()
+        
+    def update_music(self):
+        if game.state == 'game_over':
+            self.pause_music = pygame.mixer_music.pause()
+        else: 
+            self.play_music = pygame.mixer_music.play(-1)
+            
+
+    def sound_effects(self):
+        self.jump_sound = pygame.mixer.Sound('sound/jump.wav')
+        self.correct_question_sound = pygame.mixer.Sound('sound/correct_question.wav')
+        self.incorrect_question_sound = pygame.mixer.Sound('sound/incorrect_question.wav')
+        self.collision_sound = pygame.mixer.Sound('sound/collision.wav')
+        self.button_sound = pygame.mixer.Sound('sound/button_pressed.wav')
+        
 
 class Scene():
     def __init__(self):
@@ -92,7 +120,7 @@ class Player(pygame.sprite.Sprite):
         self.current_sprite = 0
         self.image = self.running_sprites[self.current_sprite]
         self.is_jumping = False
-
+        
         self.rect = self.image.get_rect(midbottom = (160, GROUND_LEVEL))
         self.gravity = 0
     
@@ -101,6 +129,8 @@ class Player(pygame.sprite.Sprite):
         if (keys[pygame.K_SPACE] or keys[pygame.K_UP] or keys[pygame.K_PAGEUP]) and self.rect.bottom >= GROUND_LEVEL:
             self.gravity = -23
             self.is_jumping = True
+            game_effects = Sound()
+            game_effects.jump_sound.play()
 
     def apply_gravity(self):
         self.gravity += 1
@@ -330,20 +360,25 @@ class Question(pygame.sprite.Sprite):
         screen.blit(resp4_text, resp4_text_rect)
 
     
+    
     def resp_incorrect(self):
         for s in obstacle_group.sprites():
             s.question_checkpoint.kill()
             s.kill()
+        game_sound = Sound()
+        game_sound.incorrect_question_sound.play() 
         game.state = 'game_over'
         print('incorrect')   
 
     def resp_correct(self):
-            if game.state == 'question':
-                game.state = 'running'
-                print('correct')
-            else:
-                game.level.next_level()
-                print('correct')
+        game_sound = Sound()
+        game_sound.correct_question_sound.play()
+        if game.state == 'question':
+            game.state = 'running'
+            print('correct')
+        else:
+            game.level.next_level()
+            print('correct')
 class Level():
     def __init__(self, game):
         self.current_level = 0
@@ -406,6 +441,9 @@ def collision_obstacle():
     if collided:
         collided[0].question_checkpoint.kill()
         collided[0].kill()
+        if not game.state == 'boss':
+            game_effects = Sound()
+            game_effects.collision_sound.play()
         return True
     return False
 
@@ -437,6 +475,9 @@ class Button:
                 action = True 
         if pygame.mouse.get_pressed()[0] == 0:
             self.clicked = False
+        if action and not game.state == 'question':
+            game_effects = Sound()
+            game_effects.button_sound.play()
         #draw button on the screen 
         screen.blit(self.image,(self.rect.x, self.rect.y))
         
@@ -455,6 +496,12 @@ pygame.display.set_caption('Mathematic Park')
 
 #Jogo
 game = Game()
+
+#Musica do Jogo
+game_music = Sound()
+game_music.game_music()
+game_music.update_music()
+
 
 #Variáveis de texto
 title_font = pygame.font.Font('press-start.regular.ttf', 40)
@@ -681,10 +728,8 @@ while True:
         scene.update()
         player.draw(screen)
         obstacle_group.draw(screen)
-
         player.sprite.update()
         obstacle_group.update()
-
         if collision_obstacle():
             game.state = 'game_over'
 
@@ -695,8 +740,7 @@ while True:
     elif game.state == 'game_over':
         game.kill_all_obstacles()
         screen.fill('black')
-        #screen.blit(game_over_text_surface, (400, 150))
-        #screen.blit(game_over_press_button_text_surface, (150, 400))
+        game_music.update_music()
         if button_gameover.draw():
             game.state = 'running'
             obstacle_group.add(Obstacle("cone"))
