@@ -310,7 +310,6 @@ class Question(pygame.sprite.Sprite):
     #Faz a aleatoriedade das questões
     def random_answer(self):
         self.answer = randint(1, 4)
-        print(self.answer)
         if self.answer == 1:
             self.response1 = self.result
             self.response2 = self.result + 5
@@ -375,16 +374,13 @@ class Question(pygame.sprite.Sprite):
             s.kill()
         sound.play("incorrect_question")
         game.state = 'game_over'
-        print('incorrect')   
 
     def resp_correct(self):
         sound.play("correct_question")
         if game.state == 'question':
             game.state = 'running'
-            print('correct')
         else:
             game.level.next_level()
-            print('correct')
 class Level():
     def __init__(self, game):
         self.current_level = 0
@@ -409,7 +405,6 @@ class Level():
 
     #Serve para mexer com o contador de obstáculos da fase e passar entre fases/bosses em caso de acerto de pergunta. Retorna o valor atualizado de game_state 
     def next_level(self):
-        print("Entrnado na funcao", self.obstacles_counter, self.obstacles_number)
         if self.game.state == 'boss':
             #Se chegar no final do jogo
             if self.current_level >= len(self.all_obstacle_numbers) - 1 :
@@ -439,7 +434,6 @@ class Level():
                 if self.obstacles_counter >= self.obstacles_number:
                     self.game.state = 'boss'
                 else: self.game.state = 'running'
-        print("saindo da funcao", self.obstacles_counter, self.obstacles_number)
 class Button: 
     def __init__(self, x, y, image,scale):
         width = image.get_width()
@@ -790,7 +784,6 @@ while True:
 
                 elif button_question1.draw():
                     if question.answer == 1:
-                        print('botao 1')
                         question.resp_correct()
                         waiting_response = False
                     else:
@@ -798,7 +791,6 @@ while True:
                         waiting_response = False
 
                 elif button_question2.draw():
-                    print('botao 2')
                     if question.answer == 2:
                         question.resp_correct()
                         waiting_response = False
@@ -807,7 +799,6 @@ while True:
                         waiting_response = False
 
                 elif button_question3.draw():
-                    print('botao 3')
                     if question.answer == 3:
                         question.resp_correct()
                         waiting_response = False
@@ -815,7 +806,6 @@ while True:
                         question.resp_incorrect()
                         waiting_response = False
                 elif button_question4.draw():
-                    print('botao 4')
                     if question.answer == 4:
                         question.resp_correct()
                         waiting_response = False
@@ -847,7 +837,6 @@ while True:
                             exit()
                         elif button_question1.draw():
                             if question.answer == 1:
-                                print('botao 1')
                                 question.resp_correct()
                                 waiting_response = False
                             else:
@@ -855,7 +844,6 @@ while True:
                                 waiting_response = False
 
                         elif button_question2.draw():
-                            print('botao 2')
                             if question.answer == 2:
                                 question.resp_correct()
                                 waiting_response = False
@@ -864,7 +852,6 @@ while True:
                                 waiting_response = False
 
                         elif button_question3.draw():
-                            print('botao 3')
                             if question.answer == 3:
                                 question.resp_correct()
                                 waiting_response = False
@@ -872,7 +859,6 @@ while True:
                                 question.resp_incorrect()
                                 waiting_response = False
                         elif button_question4.draw():
-                            print('botao 4')
                             if question.answer == 4:
                                 question.resp_correct()
                                 waiting_response = False
