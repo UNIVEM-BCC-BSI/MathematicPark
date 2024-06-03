@@ -19,16 +19,26 @@ class Game():
             s.kill()
 
     def reset(self):
-        self.level.current_level = self.level.current_level
+        self.level.current_level = 0
         self.level.obstacles_counter = 0
         self.game_music = Sound()
         self.game_music.update_music()
     
 class Sound():
     def __init__(self) -> None:
+        self.sounds = {
+            "jump": pygame.mixer.Sound('sound/jump.wav'),
+            "correct_question": pygame.mixer.Sound('sound/correct_question.wav'),
+            "incorrect_question": pygame.mixer.Sound('sound/incorrect_question.wav'),
+            "collision": pygame.mixer.Sound('sound/collision.wav'),
+            "button": pygame.mixer.Sound('sound/button_pressed.wav')
+        }
         self.game_music()
-        self.sound_effects()
+        # self.sound_effects()
         self.update_music()
+
+    def play(self, sound):
+        self.sounds[sound].play()
 
     def game_music(self):
         self.music_game = pygame.mixer_music.load('sound/game_music.mp3')
@@ -43,14 +53,13 @@ class Sound():
             self.play_music = pygame.mixer_music.play(-1)
             
 
-    def sound_effects(self):
-        self.jump_sound = pygame.mixer.Sound('sound/jump.wav')
-        self.correct_question_sound = pygame.mixer.Sound('sound/correct_question.wav')
-        self.incorrect_question_sound = pygame.mixer.Sound('sound/incorrect_question.wav')
-        self.collision_sound = pygame.mixer.Sound('sound/collision.wav')
-        self.button_sound = pygame.mixer.Sound('sound/button_pressed.wav')
+    # def sound_effects(self):
+    #     self.jump_sound = pygame.mixer.Sound('sound/jump.wav')
+    #     self.correct_question_sound = pygame.mixer.Sound('sound/correct_question.wav')
+    #     self.incorrect_question_sound = pygame.mixer.Sound('sound/incorrect_question.wav')
+    #     self.collision_sound = pygame.mixer.Sound('sound/collision.wav')
+    #     self.button_sound = pygame.mixer.Sound('sound/button_pressed.wav')
         
-
 class Scene():
     def __init__(self):
         self.scene_pos = 0
@@ -129,8 +138,7 @@ class Player(pygame.sprite.Sprite):
         if (keys[pygame.K_SPACE] or keys[pygame.K_UP] or keys[pygame.K_PAGEUP]) and self.rect.bottom >= GROUND_LEVEL:
             self.gravity = -23
             self.is_jumping = True
-            game_effects = Sound()
-            game_effects.jump_sound.play()
+            sound.play("jump")
 
     def apply_gravity(self):
         self.gravity += 1
@@ -365,14 +373,12 @@ class Question(pygame.sprite.Sprite):
         for s in obstacle_group.sprites():
             s.question_checkpoint.kill()
             s.kill()
-        game_sound = Sound()
-        game_sound.incorrect_question_sound.play() 
+        sound.play("incorrect_question")
         game.state = 'game_over'
         print('incorrect')   
 
     def resp_correct(self):
-        game_sound = Sound()
-        game_sound.correct_question_sound.play()
+        sound.play("correct_question")
         if game.state == 'question':
             game.state = 'running'
             print('correct')
@@ -387,18 +393,18 @@ class Level():
         self.obstacles_number = self.all_obstacle_numbers[self.current_level]
         self.game = game
         self.level_state = True
-        self.count_level = 1
+        # self.count_level = 1
 
     def screen_level(self):
         if self.level_state:
             screen.fill('black')
-            level_text = level_font.render(f"Fase {self.count_level}", False, 'White')
+            level_text = level_font.render(f"Fase {self.current_level + 1}", False, 'White')
             level_text_rect = level_text.get_rect()
             level_text_rect.midtop = (620, SCREEN_HEIGHT/2)
             screen.blit(level_text, level_text_rect)
             pygame.display.flip()
             sleep(1.5)
-            self.count_level += 1
+            # self.count_level += 1
             self.level_state = False
 
     #Serve para mexer com o contador de obstáculos da fase e passar entre fases/bosses em caso de acerto de pergunta. Retorna o valor atualizado de game_state 
@@ -434,27 +440,6 @@ class Level():
                     self.game.state = 'boss'
                 else: self.game.state = 'running'
         print("saindo da funcao", self.obstacles_counter, self.obstacles_number)
-
-#Checa a colisão com o obstaculo, se colidir retorna True e deleta o obstaculo e a linha e se não colidir retorna False
-def collision_obstacle():
-    collided = pygame.sprite.spritecollide(player.sprite, obstacle_group, False)
-    if collided:
-        collided[0].question_checkpoint.kill()
-        collided[0].kill()
-        if not game.state == 'boss':
-            game_effects = Sound()
-            game_effects.collision_sound.play()
-        return True
-    return False
-
-#Checa a colisão com a linha da pergunta, se colidir retorna True e deleta a linha e se não colidir retorna False
-def collision_question():
-    collided = pygame.sprite.spritecollide(player.sprite, question_checkpoint_group, False )
-    if collided:
-        collided[0].kill()
-        return True
-    return False
-        
 class Button: 
     def __init__(self, x, y, image,scale):
         width = image.get_width()
@@ -476,12 +461,32 @@ class Button:
         if pygame.mouse.get_pressed()[0] == 0:
             self.clicked = False
         if action and not game.state == 'question':
-            game_effects = Sound()
-            game_effects.button_sound.play()
+            sound.play("button")
         #draw button on the screen 
         screen.blit(self.image,(self.rect.x, self.rect.y))
         
         return action
+
+#Checa a colisão com o obstaculo, se colidir retorna True e deleta o obstaculo e a linha e se não colidir retorna False
+def collision_obstacle():
+    collided = pygame.sprite.spritecollide(player.sprite, obstacle_group, False)
+    if collided:
+        collided[0].question_checkpoint.kill()
+        collided[0].kill()
+        if not game.state == 'boss':
+            sound.play("collision")
+        return True
+    return False
+
+#Checa a colisão com a linha da pergunta, se colidir retorna True e deleta a linha e se não colidir retorna False
+def collision_question():
+    collided = pygame.sprite.spritecollide(player.sprite, question_checkpoint_group, False )
+    if collided:
+        collided[0].kill()
+        return True
+    return False
+        
+
 pygame.init()
 
 # Constantes
@@ -498,9 +503,8 @@ pygame.display.set_caption('Mathematic Park')
 game = Game()
 
 #Musica do Jogo
-game_music = Sound()
-game_music.game_music()
-game_music.update_music()
+sound = Sound()
+
 
 
 #Variáveis de texto
@@ -740,7 +744,7 @@ while True:
     elif game.state == 'game_over':
         game.kill_all_obstacles()
         screen.fill('black')
-        game_music.update_music()
+        sound.update_music()
         if button_gameover.draw():
             game.state = 'running'
             obstacle_group.add(Obstacle("cone"))
@@ -760,6 +764,7 @@ while True:
         screen.blit(final_text, final_text_rect)
         if button_final_start.draw():
             game.state = 'start'
+            game.reset()
             obstacle_group.add(Obstacle("cone"))
         elif button_final_exit.draw():
             pygame.quit()
@@ -882,4 +887,3 @@ while True:
     #Atualização do Display e FPS
     pygame.display.update()
     clock.tick(30)
-    
