@@ -11,7 +11,6 @@ class Game():
     def __init__(self) -> None:
         self.state = 'start'
         self.level = Level(self)
-        self.scene = Scene()
 
     def kill_all_obstacles(self):
         for s in obstacle_group.sprites():
@@ -63,15 +62,15 @@ class Sound():
 class Scene():
     def __init__(self):
         self.scene_pos = 0
-        self.scene = pygame.image.load('img/scenes/scene.png').convert()
+        self.scene = pygame.image.load('img/scenes/scene.png').convert_alpha()
         self.HOUSES = [
-            pygame.image.load('img/scenes/casas/casa_1.png'),
-            pygame.image.load('img/scenes/casas/casa_2.png'),
-            pygame.image.load('img/scenes/casas/casa_3.png'),
-            pygame.image.load('img/scenes/casas/casa_4.png'),
-            pygame.image.load('img/scenes/casas/casa_5.png'),
-            pygame.image.load('img/scenes/casas/casa_6.png'),
-            pygame.image.load('img/scenes/casas/casa_7.png')
+            pygame.transform.scale_by(pygame.image.load('img/scenes/casas/casa_1.png'), 1.5),
+            pygame.transform.scale_by(pygame.image.load('img/scenes/casas/casa_2.png'), 1.5),
+            pygame.transform.scale_by(pygame.image.load('img/scenes/casas/casa_3.png'), 1.5),
+            pygame.transform.scale_by(pygame.image.load('img/scenes/casas/casa_4.png'), 1.5),
+            pygame.transform.scale_by(pygame.image.load('img/scenes/casas/casa_5.png'), 1.5),
+            pygame.transform.scale_by(pygame.image.load('img/scenes/casas/casa_6.png'), 1.5),
+            pygame.transform.scale_by(pygame.image.load('img/scenes/casas/casa_7.png'), 1.5)
         ]
         self.start_house_active = False
         self.end_house_active = False
@@ -80,6 +79,7 @@ class Scene():
         self.spawn_house(True)
 
     def update(self):
+        print(scene.end_house_active)
         self.scene_pos -= 12
         screen.blit(self.scene, (self.scene_pos, 0))
         screen.blit(self.scene, (self.scene_pos + self.scene.get_width(), 0))
@@ -93,7 +93,7 @@ class Scene():
                 self.start_house_active = False
             screen.blit(self.start_house, self.start_house_rect)
         if self.end_house_active:
-            self.end_rect.centerx -= 12
+            self.end_house_rect.centerx -= 12
             screen.blit(self.start_house, self.end_house_rect)
 
     def spawn_house(self, on_start: bool = False):
@@ -105,7 +105,7 @@ class Scene():
         else:
             self.end_house_active = True
             self.end_house_rect = self.end_house.get_rect()
-            self.end_house_rect.bottom = GROUND_LEVEL - 101
+            self.end_house_rect.bottom = GROUND_LEVEL - 157
             self.end_house_rect.left = 1280
     
     def change_house(self, level : int):
@@ -172,6 +172,7 @@ class Obstacle(pygame.sprite.Sprite):
             self.image = pygame.transform.scale_by(pygame.image.load('img/obstacles/cone.png').convert_alpha(), 1.4)
         elif type == "boss":
             self.image = BOSSES[game.level.current_level]
+            scene.spawn_house()
 
         self.rect = self.image.get_rect(midbottom = (1330, GROUND_LEVEL))
 
@@ -381,6 +382,7 @@ class Question(pygame.sprite.Sprite):
             game.state = 'running'
         else:
             game.level.next_level()
+
 class Level():
     def __init__(self, game):
         self.current_level = 0
@@ -434,6 +436,7 @@ class Level():
                 if self.obstacles_counter >= self.obstacles_number:
                     self.game.state = 'boss'
                 else: self.game.state = 'running'
+                
 class Button: 
     def __init__(self, x, y, image,scale):
         width = image.get_width()
