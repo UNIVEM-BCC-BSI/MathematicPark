@@ -72,14 +72,18 @@ class Scene():
             pygame.transform.scale_by(pygame.image.load('img/scenes/casas/casa_6.png'), 1.5),
             pygame.transform.scale_by(pygame.image.load('img/scenes/casas/casa_7.png'), 1.5)
         ]
+
         self.start_house_active = False
         self.end_house_active = False
         self.start_house = self.HOUSES[0]
         self.end_house = self.HOUSES[1]
+        self.end_house_rect = self.end_house.get_rect()
+        self.end_house_rect.bottom = GROUND_LEVEL - 101
+        self.start_house_rect = self.start_house.get_rect()
+        self.start_house_rect.bottom = GROUND_LEVEL - 101
         self.spawn_house(True)
 
     def update(self):
-        print(scene.end_house_active)
         self.scene_pos -= 12
         screen.blit(self.scene, (self.scene_pos, 0))
         screen.blit(self.scene, (self.scene_pos + self.scene.get_width(), 0))
@@ -94,19 +98,20 @@ class Scene():
             screen.blit(self.start_house, self.start_house_rect)
         if self.end_house_active:
             self.end_house_rect.centerx -= 12
-            screen.blit(self.start_house, self.end_house_rect)
+            screen.blit(self.end_house, self.end_house_rect)
 
     def spawn_house(self, on_start: bool = False):
         if on_start:
             self.start_house_active = True
             self.start_house_rect = self.start_house.get_rect()
             self.start_house_rect.bottom = GROUND_LEVEL - 101
-            self.start_house_rect.centerx = 160
+            self.start_house_rect.x = 160
         else:
             self.end_house_active = True
             self.end_house_rect = self.end_house.get_rect()
-            self.end_house_rect.bottom = GROUND_LEVEL - 157
-            self.end_house_rect.left = 1280
+            self.end_house_rect.bottom = GROUND_LEVEL - 101
+            self.end_house_rect.x = 1280
+        print(self.end_house_rect.bottom, self.start_house_rect.bottom)
     
     def change_house(self, level : int):
         self.start_house = self.HOUSES[level]
@@ -164,6 +169,9 @@ class Player(pygame.sprite.Sprite):
             if self.current_sprite >= 3.0:
                 self.current_sprite = 0
             self.image = self.running_sprites[int(self.current_sprite)]
+
+    def reset_position(self):
+        self.rect.bottom = GROUND_LEVEL
 
 class Obstacle(pygame.sprite.Sprite):
     def __init__(self, type):
@@ -421,6 +429,7 @@ class Level():
                 obstacle_group.add(Obstacle("cone"))
                 self.level_state = True
                 self.game.state = 'running'
+                player.sprite.reset_position()
         else:
             self.obstacles_counter += 1
 
@@ -435,7 +444,9 @@ class Level():
                 #Se fase estiver concluida
                 if self.obstacles_counter >= self.obstacles_number:
                     self.game.state = 'boss'
-                else: self.game.state = 'running'
+                else:
+                    self.game.state = 'running'
+                    player.sprite.reset_position()
                 
 class Button: 
     def __init__(self, x, y, image,scale):
@@ -490,6 +501,7 @@ pygame.init()
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
 GROUND_LEVEL = 555
+SIDEWALK_LEVEL = 400
 
 #Variáveis do Pygame
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -694,15 +706,19 @@ while True:
         if button_soma.draw():
             operator.operation_option = '+'
             game.state = 'running'
+            player.sprite.reset_position()
         elif button_sub.draw():
             operator.operation_option = '-'
             game.state = 'running'
+            player.sprite.reset_position()
         elif button_mul.draw():
             operator.operation_option = '*'
             game.state = 'running'
+            player.sprite.reset_position()
         elif button_div.draw():
             operator.operation_option = '/'
             game.state = 'running'
+            player.sprite.reset_position()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                  pygame.quit()
@@ -744,6 +760,7 @@ while True:
         sound.update_music()
         if button_gameover.draw():
             game.state = 'running'
+            player.sprite.reset_position()
             obstacle_group.add(Obstacle("cone"))
             game.reset()
         elif button_exit_game_over.draw():
