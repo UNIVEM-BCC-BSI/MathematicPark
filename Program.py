@@ -172,6 +172,7 @@ class Player(pygame.sprite.Sprite):
 
     def reset_position(self):
         self.rect.bottom = GROUND_LEVEL
+        self.gravity = 0
 
 class Obstacle(pygame.sprite.Sprite):
     def __init__(self, type):
