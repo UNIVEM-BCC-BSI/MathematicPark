@@ -22,4 +22,4 @@ No Mathematic Park, as crianças são convidadas a explorar um ambiente virtual 
 
 --- 
 
-Sinta-se à vontade para ajustar conforme necessário!
+Obrigado pela atenção!
