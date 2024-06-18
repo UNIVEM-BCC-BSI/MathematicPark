@@ -3,6 +3,7 @@ import sys
 from sys import exit
 from random import randint
 from time import sleep
+import cv2
 from pygame.sprite import Group
 
 #Classes
@@ -495,7 +496,6 @@ def collision_question():
         return True
     return False
         
-
 pygame.init()
 
 # Constantes
@@ -515,7 +515,10 @@ game = Game()
 #Musica do Jogo
 sound = Sound()
 
-
+#video
+cap = cv2.VideoCapture('img/video_historia.mp4')
+success, img = cap.read()
+shape = img.shape[1::-1]
 
 #Variáveis de texto
 title_font = pygame.font.Font('press-start.regular.ttf', 40)
@@ -706,19 +709,19 @@ while True:
 
         if button_soma.draw():
             operator.operation_option = '+'
-            game.state = 'running'
+            game.state = 'story'
             player.sprite.reset_position()
         elif button_sub.draw():
             operator.operation_option = '-'
-            game.state = 'running'
+            game.state = 'story'
             player.sprite.reset_position()
         elif button_mul.draw():
             operator.operation_option = '*'
-            game.state = 'running'
+            game.state = 'story'
             player.sprite.reset_position()
         elif button_div.draw():
             operator.operation_option = '/'
-            game.state = 'running'
+            game.state = 'story'
             player.sprite.reset_position()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -739,6 +742,33 @@ while True:
         else:
             seta_rect.midright = (-100, -100) 
 
+    elif game.state == 'story':
+        success, img = cap.read()
+
+        while cap.isOpened():
+            success, frame = cap.read()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+                if event.type == pygame.K_SPACE:
+                    success = False
+                    game.state = 'running'
+                    cap.release()
+            if not success:
+                break
+
+            frame = cv2.resize(frame, (SCREEN_WIDTH, SCREEN_HEIGHT))
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            frame = frame.swapaxes(0, 1)
+            frame = pygame.surfarray.make_surface(frame)
+
+            screen.blit(frame, (0, 0))
+            pygame.display.update()
+            sleep(.03)
+
+        game.state = 'running'
+        cap.release()
 
     #Jogo
     elif game.state == 'running':
