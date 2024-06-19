@@ -299,12 +299,18 @@ class Question(pygame.sprite.Sprite):
             while self.num1 % self.num2 != 0:
                 self.num1 = randint(1, 20)
                 self.num2 = randint(1, 10)
-        else:
-            self.num1 = randint(1, 100)
-            self.num2 = randint(1, 80)
+        elif game.state == 'boss':
+            self.num1 = randint(1, 40)
+            self.num2 = randint(1, 40)
 
-        while self.num2 > self.num1:
-            self.num2 = randint(1, 80)
+            while self.num2 > self.num1:
+                self.num2 = randint(1, 40)
+        else:
+            self.num1 = randint(1, 20)
+            self.num2 = randint(1, 20)
+
+            while self.num2 > self.num1:
+                self.num2 = randint(1, 20)
 
         self.result = int(eval(str(self.num1) + self.operation + str(self.num2)))
         return self.result
@@ -487,7 +493,13 @@ def collision_question():
         collided[0].kill()
         return True
     return False
-        
+
+def show_text(nome, x, y):
+        txt = start_font.render(nome, False, 'white')
+        rect = txt.get_rect()
+        rect.center = (x, y)
+        screen.blit(txt, rect)
+
 pygame.init()
 
 # Constantes
@@ -666,7 +678,7 @@ while True:
             if key.type == pygame.QUIT:
                 pygame.quit()
                 exit()
-    mouse_pos = pygame.mouse.get_pos()            
+    mouse_pos = pygame.mouse.get_pos() 
     #Tela Inicial
     if game.state == 'start':
         screen.blit(inicial_surface, (0,0))
@@ -695,6 +707,13 @@ while True:
     elif game.state == 'credits':
         screen.blit(operacao_surface, (0,0))
         screen.blit(seta_img, seta_rect)
+
+        show_text("Vinícius Boroto dos Anjos", SCREEN_WIDTH/2, 300)
+        show_text("Eduardo Wesley Toccini", SCREEN_WIDTH/2, 350)
+        show_text("Luan Martins Toniolo", SCREEN_WIDTH/2, 400)
+        show_text("Maria Eduarda Moura Gandra", SCREEN_WIDTH/2, 450)
+        show_text("Kauã Vinicius de Souza", SCREEN_WIDTH/2, 500)
+
         if button_return.draw():
             game.state = 'start'
         for event in pygame.event.get():
