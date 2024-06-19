@@ -112,7 +112,6 @@ class Scene():
             self.end_house_rect = self.end_house.get_rect()
             self.end_house_rect.bottom = GROUND_LEVEL - 101
             self.end_house_rect.x = 1280
-        print(self.end_house_rect.bottom, self.start_house_rect.bottom)
     
     def change_house(self, level : int):
         self.start_house = self.HOUSES[level]
@@ -412,6 +411,7 @@ class Level():
             screen.blit(level_text, level_text_rect)
             pygame.display.flip()
             sleep(1.5)
+            player.sprite.reset_position()
             # self.count_level += 1
             self.level_state = False
 
@@ -747,14 +747,16 @@ while True:
 
         while cap.isOpened():
             success, frame = cap.read()
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_SPACE]:
+                success = False
+                game.state = 'running'
+                player.sprite.reset_position()
+                cap.release()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     exit()
-                if event.type == pygame.K_SPACE:
-                    success = False
-                    game.state = 'running'
-                    cap.release()
             if not success:
                 break
 
@@ -769,6 +771,7 @@ while True:
 
         game.state = 'running'
         cap.release()
+        pass
 
     #Jogo
     elif game.state == 'running':
@@ -818,7 +821,7 @@ while True:
         screen.blit(final_exit_text, final_exit_text_rect)
 
     #Loop da Questão         
-    elif game.state == 'question' :
+    elif game.state == 'question':
         button_question1.draw()
         button_question2.draw()
         button_question3.draw()
