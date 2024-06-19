@@ -51,14 +51,6 @@ class Sound():
             self.pause_music = pygame.mixer_music.pause()
         else: 
             self.play_music = pygame.mixer_music.play(-1)
-            
-
-    # def sound_effects(self):
-    #     self.jump_sound = pygame.mixer.Sound('sound/jump.wav')
-    #     self.correct_question_sound = pygame.mixer.Sound('sound/correct_question.wav')
-    #     self.incorrect_question_sound = pygame.mixer.Sound('sound/incorrect_question.wav')
-    #     self.collision_sound = pygame.mixer.Sound('sound/collision.wav')
-    #     self.button_sound = pygame.mixer.Sound('sound/button_pressed.wav')
         
 class Scene():
     def __init__(self):
@@ -175,13 +167,13 @@ class Player(pygame.sprite.Sprite):
         self.gravity = 0
 
 class Obstacle(pygame.sprite.Sprite):
-    def __init__(self, type):
+    def __init__(self, type = None):
         super().__init__()
-        if type == "cone":
-            self.image = pygame.transform.scale_by(pygame.image.load('img/obstacles/cone.png').convert_alpha(), 1.4)
-        elif type == "boss":
+        if type == "boss":
             self.image = BOSSES[game.level.current_level]
             scene.spawn_house()
+        else:
+            self.image = OBSTACLES[game.level.current_level][randint(0, len(OBSTACLES[game.level.current_level]) - 1)]
 
         self.rect = self.image.get_rect(midbottom = (1330, GROUND_LEVEL))
 
@@ -196,7 +188,7 @@ class Obstacle(pygame.sprite.Sprite):
             game.level.next_level()
             self.kill()
             if game.state == 'running':
-                obstacle_group.add(Obstacle("cone"))
+                obstacle_group.add(Obstacle())
             del self
         else:
             self.question_checkpoint.update()
@@ -396,7 +388,7 @@ class Level():
     def __init__(self, game):
         self.current_level = 0
         self.obstacles_counter = 0
-        self.all_obstacle_numbers = [1, 1, 1]
+        self.all_obstacle_numbers = [3, 5, 7]
         self.obstacles_number = self.all_obstacle_numbers[self.current_level]
         self.game = game
         self.level_state = True
@@ -407,7 +399,7 @@ class Level():
             screen.fill('black')
             level_text = level_font.render(f"Fase {self.current_level + 1}", False, 'White')
             level_text_rect = level_text.get_rect()
-            level_text_rect.midtop = (620, SCREEN_HEIGHT/2)
+            level_text_rect.midtop = (620, SCREEN_HEIGHT/2 - 50)
             screen.blit(level_text, level_text_rect)
             pygame.display.flip()
             sleep(1.5)
@@ -428,7 +420,7 @@ class Level():
                 self.obstacles_number = self.all_obstacle_numbers[self.current_level]
                 self.obstacles_counter = 0
                 self.game.kill_all_obstacles()
-                obstacle_group.add(Obstacle("cone"))
+                obstacle_group.add(Obstacle())
                 self.level_state = True
                 self.game.state = 'running'
                 player.sprite.reset_position()
@@ -448,7 +440,7 @@ class Level():
                     self.game.state = 'boss'
                 else:
                     self.game.state = 'running'
-                    player.sprite.reset_position()
+                    # player.sprite.reset_position()
                 
 class Button: 
     def __init__(self, x, y, image,scale):
@@ -512,6 +504,32 @@ pygame.display.set_caption('Mathematic Park')
 #Jogo
 game = Game()
 
+OBSTACLES = [
+    [
+       pygame.transform.scale_by(pygame.image.load('img/obstacles/maca.png').convert_alpha(), 1.6),
+       pygame.transform.scale_by(pygame.image.load('img/obstacles/banana.png').convert_alpha(), 1.6)
+    ],
+    [
+        pygame.transform.scale_by(pygame.image.load('img/obstacles/pocao1.png').convert_alpha(), 1.45),
+        pygame.transform.scale_by(pygame.image.load('img/obstacles/pocao2.png').convert_alpha(), 1.45),
+        pygame.transform.scale_by(pygame.image.load('img/obstacles/pocao3.png').convert_alpha(), 1.45)
+    ],
+    [
+        pygame.transform.scale_by(pygame.image.load('img/obstacles/cone.png').convert_alpha(), 1.3)
+    ]
+]
+
+
+BOSSES = [
+    pygame.transform.scale_by(pygame.image.load('img/characters/billy.png').convert_alpha(), 1.3),
+    pygame.transform.scale_by(pygame.image.load('img/characters/alberto.png').convert_alpha(), 1.4),
+    pygame.transform.scale_by(pygame.image.load('img/characters/policialterry.png').convert_alpha(), 1.75),
+]
+BOSSES_NAMES = [
+    'Billy',
+    'Alberto',
+    'Policial Terry'
+]
 #Musica do Jogo
 sound = Sound()
 
@@ -528,7 +546,7 @@ operation_screen_font = pygame.font.Font('press-start.regular.ttf', 24)
 level_font = pygame.font.Font('press-start.regular.ttf', 100)
 question_font = pygame.font.Font('press-start.regular.ttf', 24)
 game_over_font = pygame.font.Font('press-start.regular.ttf', 20)
-final_font = pygame.font.Font('press-start.regular.ttf',20)
+final_font = pygame.font.Font('press-start.regular.ttf', 25)
 
 game_over_text_surface = title_font.render('VOCE PERDEU', False, 'yellow')
 game_over_press_button_text_surface = game_over_font.render('Pressione o botao Recomecar para iniciar o jogo', False, 'White')
@@ -538,7 +556,7 @@ credits_text = start_font.render('Voltar', False, 'White')
 level_text = level_font.render(f"Fase", False, 'White')
 question_text_surface = subtitle_font.render("Pergunta", False, 'Black')
 question_text = question_font.render('Digite um Número', False, 'White')
-final_text = final_font.render("Parabéns você venceu todos os desafios !!", False, 'yellow')
+final_text = final_font.render("Parabéns, você venceu todos os desafios !!", False, 'yellow')
 final_start_text = final_font.render("Inicio", False, 'white')
 final_exit_text = final_font.render("Sair", False, 'white')
 
@@ -551,7 +569,7 @@ level_text_rect.center = (SCREEN_WIDTH/2, SCREEN_HEIGHT/2)
 question_text_rect = question_text.get_rect()
 question_text_rect.center = (SCREEN_WIDTH/2, 400)
 final_text_rect = final_text.get_rect()
-final_text_rect.center = (SCREEN_WIDTH/2, SCREEN_HEIGHT/2)
+final_text_rect.center = (SCREEN_WIDTH/2, SCREEN_HEIGHT/2 - 150)
 final_start_text_rect = final_start_text.get_rect()
 final_start_text_rect.center = (450, 540)
 final_exit_text_rect = final_exit_text.get_rect()
@@ -564,20 +582,10 @@ player.add(Player())
 question_checkpoint_group = pygame.sprite.Group()
 
 obstacle_group = pygame.sprite.Group()
-obstacle_group.add(Obstacle("cone"))
+obstacle_group.add(Obstacle())
 
 scene = Scene()
 
-BOSSES = [
-    pygame.transform.scale_by(pygame.image.load('img/characters/billy.png').convert_alpha(), 1.1),
-    pygame.transform.scale_by(pygame.image.load('img/characters/alberto.png').convert_alpha(), 1.4),
-    pygame.transform.scale_by(pygame.image.load('img/characters/policialterry.png').convert_alpha(), 1.75),
-]
-BOSSES_NAMES = [
-    'Billy',
-    'Alberto',
-    'Policial Terry'
-]
 #Variáveis do cenário
 inicial_surface = pygame.image.load('img/telalogo1.png').convert()
 inicial_surface =pygame.transform.scale(inicial_surface, (1280, 720))
@@ -769,12 +777,19 @@ while True:
             pygame.display.update()
             sleep(.03)
 
-        game.state = 'running'
         cap.release()
-        pass
+        player.sprite.reset_position()
+        game.state = 'running'
+        start = 0
+        continue
 
     #Jogo
     elif game.state == 'running':
+        if (start >= 0):
+            if (start < 5):
+                player.sprite.reset_position()
+                start = start + 1
+            else: start = -1
         game.level.screen_level()
         scene.update()
         player.draw(screen)
@@ -795,14 +810,14 @@ while True:
         if button_gameover.draw():
             game.state = 'running'
             player.sprite.reset_position()
-            obstacle_group.add(Obstacle("cone"))
+            obstacle_group.add(Obstacle())
             game.reset()
         elif button_exit_game_over.draw():
             pygame.quit()
             exit()
         elif button_inicio.draw():
             game.state = 'start'
-            obstacle_group.add(Obstacle("cone"))
+            obstacle_group.add(Obstacle())
         game_over_text = Game_Over()
         game_over_text.game_over_text()
              
@@ -813,7 +828,7 @@ while True:
         if button_final_start.draw():
             game.state = 'start'
             game.reset()
-            obstacle_group.add(Obstacle("cone"))
+            obstacle_group.add(Obstacle())
         elif button_final_exit.draw():
             pygame.quit()
             exit()
