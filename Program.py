@@ -212,7 +212,7 @@ class Start():
         start_text_rect.midtop = (SCREEN_WIDTH/2, 325)
         screen.blit(start_text, start_text_rect)
 
-        start_text = start_font.render(f"Creditos", False, 'white')
+        start_text = start_font.render(f"Créditos", False, 'white')
         start_text_rect = start_text.get_rect()
         start_text_rect.midtop = (SCREEN_WIDTH/2, 425)
         screen.blit(start_text, start_text_rect)
@@ -224,13 +224,13 @@ class Start():
 
 class Game_Over():
     def game_over_text(self):
-        game_over_text_surface = title_font.render('VOCE PERDEU', False, 'yellow')
+        game_over_text_surface = title_font.render('VOCÊ PERDEU', False, 'yellow')
         screen.blit(game_over_text_surface, (440, 150))
 
         game_over_press_button_text_surface = game_over_font.render('Quer Jogar Novamente?', False, 'White')
         screen.blit(game_over_press_button_text_surface, (445, 350))
 
-        button_game_over_text = game_over_font.render(f"Recomecar", False, 'white')
+        button_game_over_text = game_over_font.render(f"Recomeçar", False, 'white')
         button_game_over_text_rect = button_game_over_text.get_rect()
         button_game_over_text_rect.midtop = (350, 530)
         screen.blit(button_game_over_text, button_game_over_text_rect)
@@ -240,7 +240,7 @@ class Game_Over():
         button_game_over_text_rect.midtop = (650, 530)
         screen.blit(button_game_over_text, button_game_over_text_rect)
 
-        button_game_over_text = game_over_font.render(f"Inicio", False, 'white')
+        button_game_over_text = game_over_font.render(f"Início", False, 'white')
         button_game_over_text_rect = button_game_over_text.get_rect()
         button_game_over_text_rect.midtop = (950, 530)
         screen.blit(button_game_over_text, button_game_over_text_rect)
@@ -248,7 +248,7 @@ class Game_Over():
 class Operation():
     #Texto para pedir a operação
     def operation_text(self):
-        operation_text = operation_screen_font.render(f"Selecione a operacao", False, 'white')
+        operation_text = operation_screen_font.render(f"Selecione a operação", False, 'white')
         operation_text_rect = operation_text.get_rect()
         operation_text_rect.center = (SCREEN_WIDTH/2, 300)
         screen.blit(operation_text, operation_text_rect)
@@ -560,16 +560,16 @@ question_font = pygame.font.Font('press-start.regular.ttf', 24)
 game_over_font = pygame.font.Font('press-start.regular.ttf', 20)
 final_font = pygame.font.Font('press-start.regular.ttf', 25)
 
-game_over_text_surface = title_font.render('VOCE PERDEU', False, 'yellow')
-game_over_press_button_text_surface = game_over_font.render('Pressione o botao Recomecar para iniciar o jogo', False, 'White')
-game_over_press_button_text_surface = game_over_font.render('ou o botao Sair para sair do jogo', False, 'White')
+game_over_text_surface = title_font.render('VOCÊ PERDEU', False, 'yellow')
+game_over_press_button_text_surface = game_over_font.render('Pressione o botão Recomeçar para iniciar o jogo', False, 'White')
+game_over_press_button_text_surface = game_over_font.render('ou o botão Sair para sair do jogo', False, 'White')
 start_text = start_font.render('Pressione  qualquer  tecla  para  jogar', False, 'White')
 credits_text = start_font.render('Voltar', False, 'White')
 level_text = level_font.render(f"Fase", False, 'White')
 question_text_surface = subtitle_font.render("Pergunta", False, 'Black')
 question_text = question_font.render('Digite um Número', False, 'White')
 final_text = final_font.render("Parabéns, você venceu todos os desafios !!", False, 'yellow')
-final_start_text = final_font.render("Inicio", False, 'white')
+final_start_text = final_font.render("Início", False, 'white')
 final_exit_text = final_font.render("Sair", False, 'white')
 
 start_text_rect = start_text.get_rect()
